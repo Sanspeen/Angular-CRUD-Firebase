@@ -1,0 +1,6 @@
+#Mon Aug 22 20:46:00 COT 2011
+eclipse.preferences.version=1
+jarsExcludedFromWebInfLib=
+launchConfigExternalUrlPrefix=http\://localhost\:8888/AccessControlDB-war/
+warSrcDir=war
+warSrcDirIsOutput=true
