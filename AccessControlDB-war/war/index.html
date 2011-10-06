@@ -1,0 +1,84 @@
+<!doctype html>
+
+
+<html>
+<head>
+<title>:.Control Acceso DB.:</title>
+<style>
+.invisible {
+	display: none;
+}
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta http-equiv=“X-UA-Compatible” content="IE=8" />
+
+<link type="text/css" rel="stylesheet" href="css/AccessControl.css">
+
+<!--[if IE 7]><link href="css/ie.css" rel="stylesheet" type="text/css" /><![endif]-->
+<script type="text/javascript" src="js/codemirror.js"></script>
+<script type="text/javascript" src="js/plsql.js"></script>
+<script type="text/javascript" language="javascript"
+	src="accesscontroldb_war/accesscontroldb_war.nocache.js"></script>
+
+</head>
+
+<body>
+	<iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1'
+		style="position: absolute; width: 0; height: 0; border: 0"></iframe>
+	<div id="header">
+		<div id="title">Data Base Access Control</div>
+		<div id="sessionData">
+			<ul>
+				<li><strong>Environment:</strong> <span id="environment"></span>
+				</li>
+				<li><strong>Instance:</strong> <span id="instance"></span>
+				</li>
+				<li><strong>User:</strong> <span id="user"></span>
+				</li>
+				<li><strong>User Code:</strong> <span id="userCode"></span>
+				</li>
+				<li><strong>User Name:</strong> <span id="userName"></span>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<div id="splitterContainer">
+		<div id="rightPane">
+			<div id="rightSplitterContainer" style="height: 100%">
+				<div id="rightTopPane">
+					<div id="query">
+						<div id="queryMenu" class="menu">
+							<ul>
+								<li id="execute"></li>
+								<li id="clear"></li>
+								<li id="switchInstance"></li>
+								<li id="openWindow"></li>
+							</ul>
+						</div>
+						<div id="queryField"></div>
+					</div>
+				</div>
+				<div id="rightBottomPane">
+					<div id="result">
+						<div id="preloader" class="preloader"></div>
+						<div id="tabs"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="developedBy">
+		Developed by <a href="http://www.pratechgroup.com" target="_blank">PraTech
+			Group</a>
+	</div>
+	<script type="text/javascript">
+		var editor = CodeMirror.fromTextArea(document
+				.getElementById("textareaQuery"), {
+			lineNumbers : true,
+			matchBrackets : true,
+			indentUnit : 4,
+			mode : "text/x-plsql"
+		});
+	</script>
+</body>
+</html>
