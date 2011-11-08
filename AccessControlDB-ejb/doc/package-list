@@ -1,8 +1,0 @@
-com.pratech.accesscontroldb.DTO
-com.pratech.accesscontroldb.common
-com.pratech.accesscontroldb.core
-com.pratech.accesscontroldb.core.ad
-com.pratech.accesscontroldb.core.connection
-com.pratech.accesscontroldb.core.sqlresponse
-com.pratech.accesscontroldb.persistence
-com.pratech.accesscontroldb.util
