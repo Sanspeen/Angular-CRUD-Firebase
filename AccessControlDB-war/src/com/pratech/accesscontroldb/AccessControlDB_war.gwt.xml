@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to='accesscontroldb_war'>
+
+	<inherits name='com.google.gwt.user.User' />
+	<inherits name='com.google.gwt.user.theme.clean.Clean'/>
+	
+	<entry-point class='com.pratech.accesscontroldb.client.AccessControlDB_war' />
+
+	<source path='client' />
+
+</module>
