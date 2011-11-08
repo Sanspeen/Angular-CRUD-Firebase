@@ -1,0 +1,4 @@
+#header { height: 4% !important; }
+#splitterContainer { height: 96% !important; }
+.CodeMirror-scroll { height: 270px !important; }
+.menu .separator { margin-top: -25px !important; display: inline-block; }
