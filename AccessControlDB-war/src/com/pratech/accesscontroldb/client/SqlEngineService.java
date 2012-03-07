@@ -88,4 +88,10 @@ public interface SqlEngineService extends RemoteService {
 	
 	public String getXMLType(String[] parameters, DataConnection dataConnection);
 
+	Integer getUserSessionTimeout();
+	
+	Boolean isSessionAlive();
+	
+	void ping();	
+	
 }

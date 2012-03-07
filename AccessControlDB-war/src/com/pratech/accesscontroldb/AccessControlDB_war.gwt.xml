@@ -8,4 +8,12 @@
 
 	<source path='client' />
 
+	<!-- <servlet path="/sqlEngineService"
+		class="com.pratech.accesscontroldb.server.SqlEngineServiceImpl" /> -->
+
+	<generate-with
+		class="com.pratech.accesscontroldb.server.MyRpcRemoteProxyGenerator">
+		<when-type-assignable class="com.google.gwt.user.client.rpc.RemoteService" />
+	</generate-with>
+
 </module>

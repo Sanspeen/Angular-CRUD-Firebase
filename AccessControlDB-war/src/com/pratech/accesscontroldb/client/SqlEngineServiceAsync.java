@@ -39,5 +39,12 @@ public interface SqlEngineServiceAsync {
 
 	void getXMLType(String[] parameters, DataConnection dataConnection,
 			AsyncCallback<String> callback);
+	
+	void getUserSessionTimeout(AsyncCallback<Integer> callback);
+	
+	void isSessionAlive(AsyncCallback<Boolean> callback);
+
+	void ping(AsyncCallback callback);
+
 
 }

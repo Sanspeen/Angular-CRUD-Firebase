@@ -13,6 +13,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import com.pratech.accesscontroldb.common.ACConfig;
 
 public class Write {
+	@SuppressWarnings("finally")
 	public String writeExcel(List<String[]> lisDat) {
 		String nameFile = "";
 
@@ -24,6 +25,7 @@ public class Write {
 		HSSFRow row;
 		HSSFCell cell;
 		HSSFRichTextString texto;
+		boolean ready=false;
 
 		for (int i = 1; i < lisDat.size(); i++) {
 			String[] fil = lisDat.get(i);
@@ -35,6 +37,7 @@ public class Write {
 			}
 		}		
 
+		
 		// Se salva el libro.
 		try {
 			Date time = new Date();
@@ -47,11 +50,17 @@ public class Write {
 			libro.write(theFile);
 //			FilePermission objFP1 =new FilePermission(url, "read,write,delete");
 //			System.out.println("Se creo xls - actio - " + objFP1.getActions());			
+			
+			
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
+		//TO-DO 
+		finally{
 		return nameFile;
+		}
+		
 
 	}
 }

@@ -7,8 +7,11 @@ com.pratech.accesscontroldb.client.DTO.DataConnection, false, false, true, true,
 com.pratech.accesscontroldb.client.DTO.RequestDTO, false, false, true, true, com.pratech.accesscontroldb.client.DTO.RequestDTO/773456498, 773456498
 com.pratech.accesscontroldb.client.DTO.ResponseDTO, true, true, false, false, com.pratech.accesscontroldb.client.DTO.ResponseDTO/112618797, 112618797
 com.pratech.accesscontroldb.client.SqlEngineService, false, false, false, false, _, 551259742
+java.lang.Boolean, true, true, false, false, java.lang.Boolean/476441737, 476441737
 java.lang.Exception, true, false, true, false, java.lang.Exception/1920171873, 1920171873
 java.lang.IllegalArgumentException, true, true, false, false, java.lang.IllegalArgumentException/1755012560, 1755012560
+java.lang.Integer, true, true, false, false, java.lang.Integer/3438268394, 3438268394
+java.lang.Number, true, false, false, false, java.lang.Number/300033342, 300033342
 java.lang.NumberFormatException, true, true, false, false, java.lang.NumberFormatException/3305228476, 3305228476
 java.lang.RuntimeException, true, false, true, false, java.lang.RuntimeException/515124647, 515124647
 java.lang.String, true, true, true, true, java.lang.String/2004016611, 2004016611

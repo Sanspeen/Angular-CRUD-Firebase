@@ -18,6 +18,8 @@ import suramericana.cronos.excepciones.UndefinedAplicationException;
  */
 public class Store {
 
+	private String app_name = "ACCESSCONTROLDB";
+	
 	/**
 	 * Guarda la auditoria
 	 * 
@@ -28,6 +30,7 @@ public class Store {
 	public void save(String typeError, LogSql logSql) {
 
 		// Messages audit
+		
 		if (typeError.equals("1")) {
 
 			if (logSql.getCod().length() < 1) {
@@ -35,7 +38,7 @@ public class Store {
 			}
 			AuditoriaCronos logger = null;
 			try {
-				logger = new AuditoriaCronos(null, "ACCESSCONTROLDB");
+				logger = new AuditoriaCronos(null, app_name);
 			} catch (UndefinedAplicationException ex) {
 				ex.getLocalizedMessage();
 			}
@@ -57,7 +60,7 @@ public class Store {
 				logSql.setCod("AC2");
 			}
 			AuditoriaCronos logger = new AuditoriaCronos(null,
-					"ACCESSCONTROLDB");
+					app_name);
 			try {
 
 				if (logSql.getCamposTexto()[0].length() > 0) {
@@ -84,7 +87,7 @@ public class Store {
 			}
 
 			AuditoriaCronos loggerCronos = new AuditoriaCronos(null,
-					"ACCESSCONTROLDB");
+					app_name);
 			try {
 				loggerCronos.info(logSql.getUsuario(), logSql.getCod(),
 						Long.parseLong(ACConfig.getValue("transaccion")),
@@ -102,7 +105,7 @@ public class Store {
 				logSql.setCod("AC4");
 			}
 
-			LoggerCronos logger = new LoggerCronos(null, "ACCESSCONTROLDB");
+			LoggerCronos logger = new LoggerCronos(null, app_name);
 			try {
 				logger.error(logSql.getCod(), logSql.getUsuario(),
 						logSql.getDescripcionAudit(),

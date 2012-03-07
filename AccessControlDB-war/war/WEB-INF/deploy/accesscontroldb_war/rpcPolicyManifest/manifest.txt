@@ -1,2 +1,3 @@
 # Module accesscontroldb_war
 # RPC service class, partial path of RPC policy file
+com.pratech.accesscontroldb.client.SqlEngineService, B7C35F64B2D9BA7F5B32D809EA2E5D83.gwt.rpc

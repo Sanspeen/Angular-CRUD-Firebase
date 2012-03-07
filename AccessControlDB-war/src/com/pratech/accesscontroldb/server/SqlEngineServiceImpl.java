@@ -17,6 +17,9 @@ import java.util.List;
 public class SqlEngineServiceImpl extends RemoteServiceServlet implements
 		SqlEngineService {
 
+	private static final long serialVersionUID = 1L;
+	private int timeout;
+
 	public ResponseDTO sendSql(RequestDTO rq, List<BlocksVarible> listBlock,
 			DataConnection dataConnection) {
 		ResponseDTO response = new ResponseDTO();
@@ -195,4 +198,24 @@ public class SqlEngineServiceImpl extends RemoteServiceServlet implements
 		dConneRemote.setIpUser(getThreadLocalRequest().getRemoteAddr());
 		return dConneRemote;
 	}
+
+	public Integer getUserSessionTimeout() {
+		timeout = getThreadLocalRequest().getSession().getMaxInactiveInterval() * 1000;
+		return timeout;
+	}
+
+	public Boolean isSessionAlive() {
+		int tim = (int) System.currentTimeMillis();
+		int rr = (int) getThreadLocalRequest().getSession().getLastAccessedTime();
+		System.out.println(tim - rr + " < " + timeout);
+		return new Boolean(
+				(System.currentTimeMillis() - getThreadLocalRequest()
+						.getSession().getLastAccessedTime()) < timeout);
+	}
+
+	public void ping() {
+	}
+
+
+
 }

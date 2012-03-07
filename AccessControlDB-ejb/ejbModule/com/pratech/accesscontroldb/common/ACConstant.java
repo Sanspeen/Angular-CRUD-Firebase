@@ -14,5 +14,5 @@ public class ACConstant {
 	public static final String PATH_FUENTE = "/oracle/home/APLIC/escritura/accesscontroldb/dataFuente.xml";
 	public static final String PATH_NUFUENTE = "/oracle/home/APLIC/escritura/accesscontroldb/dataNumeroFuente.xml";
 	/** Tamaño del buffer para la salida de mensajes de ORACLE*/
-	public static final int SIZE_BUFFER = 100000;
+	public static final int SIZE_BUFFER = 200000;
 }

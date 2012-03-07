@@ -1,2 +1,2 @@
 serviceClass: com.pratech.accesscontroldb.client.SqlEngineService
-path: 8F03DECC8CDCCA8BCCA5E710A7A01C98.gwt.rpc
+path: B7C35F64B2D9BA7F5B32D809EA2E5D83.gwt.rpc

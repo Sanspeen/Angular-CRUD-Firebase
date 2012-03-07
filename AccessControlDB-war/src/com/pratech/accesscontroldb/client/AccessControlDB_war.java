@@ -21,7 +21,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -49,6 +51,7 @@ import com.pratech.accesscontroldb.client.DTO.ResponseDTO;
 import com.pratech.accesscontroldb.client.view_elements.FastCellTable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -214,6 +217,10 @@ public class AccessControlDB_war implements EntryPoint {
 	private List<PendingChangeVari<?>> pendingChangesVari = new ArrayList<PendingChangeVari<?>>(
 			0);
 
+	// Manejo de time out
+	private Timer sessionTimeoutResponseTimer;
+	private Integer timeoutCicle;
+
 	/**
 	 * Creates a new instance of MainEntryPoint
 	 */
@@ -321,7 +328,9 @@ public class AccessControlDB_war implements EntryPoint {
 														.getNameFileExport()
 														.trim(), "Export", "");
 									}
+					
 								}
+					
 							}
 						}
 
@@ -407,6 +416,13 @@ public class AccessControlDB_war implements EntryPoint {
 		btnIn.addClickHandler(new ClickHandler() {
 
 			public void onClick(ClickEvent event) {
+				textAreaSQL.setText("");
+				clearTable(table);
+				clearTableBlock(tableBlock);
+				txtrBuffer.setText("");
+				image.setVisible(false);
+				pages.setText("");
+
 				dataConnection.setScope(lisScope.getValue(lisScope
 						.getSelectedIndex()));
 				if (lisInstance.getSelectedIndex() < 0) {
@@ -835,6 +851,20 @@ public class AccessControlDB_war implements EntryPoint {
 		flowPage.add(btnFirst);
 		flowPage.add(btnPrevious);
 		flowPage.add(btnNext);
+		Button btncoo = new Button();
+		flowPage.add(btncoo);
+
+		btncoo.addClickHandler(new ClickHandler() {
+
+			public void onClick(ClickEvent arg0) {
+				Collection<String> cookies = Cookies.getCookieNames();
+				for (String cookie : cookies) {
+					Cookies.removeCookie(cookie);
+					System.out.println(cookie);
+				}
+
+			}
+		});
 
 		InlineLabel nlnlblNewInlinelabel = new InlineLabel("");
 		nlnlblNewInlinelabel.addStyleName("clear");
@@ -1297,8 +1327,13 @@ public class AccessControlDB_war implements EntryPoint {
 						// reco = recordsTable;
 						String colum = responseDTO.getListData().get(1)[val];
 						String row = recordsTable.reg[0];
-						String[] para = new String[] { colum, row,
-								textAreaSQL.getText() };
+						String sqlTemp;
+						if (textAreaSQL.getSelectionLength() > 1) {
+							sqlTemp = textAreaSQL.getSelectedText().trim();
+						} else {
+							sqlTemp = textAreaSQL.getText().trim();
+						}
+						String[] para = new String[] { colum, row, sqlTemp };
 						sqlEng.getCLOB(para, dataConnection,
 								new AsyncCallback<String>() {
 
@@ -1347,8 +1382,13 @@ public class AccessControlDB_war implements EntryPoint {
 						// reco = recordsTable;
 						String colum = responseDTO.getListData().get(1)[val];
 						String row = recordsTable.reg[0];
-						String[] para = new String[] { colum, row,
-								textAreaSQL.getText() };
+						String sqlTemp;
+						if (textAreaSQL.getSelectionLength() > 1) {
+							sqlTemp = textAreaSQL.getSelectedText().trim();
+						} else {
+							sqlTemp = textAreaSQL.getText().trim();
+						}
+						String[] para = new String[] { colum, row, sqlTemp };
 						sqlEng.getXMLType(para, dataConnection,
 								new AsyncCallback<String>() {
 
@@ -1844,9 +1884,13 @@ public class AccessControlDB_war implements EntryPoint {
 						j++;
 					}
 				}
+				if (requestDTO.getBlockSQL().length > 0) {
 				requestDTO.setCommitBlock(true);
 				requestDTO.setExportData(0);
 				sendSql();
+				} else {
+					Window.alert("No hay instrucciones a ejecutar");
+				}
 				modalTable.hide();
 			}
 		});

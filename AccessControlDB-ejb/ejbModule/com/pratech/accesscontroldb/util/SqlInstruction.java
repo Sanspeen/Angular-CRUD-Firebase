@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+//import com.google.gwt.user.client.Window;
 import com.pratech.accesscontroldb.DTO.BlocksVariable;
 import com.pratech.accesscontroldb.DTO.RequestDTO;
 import com.pratech.accesscontroldb.common.ACConfig;
@@ -49,18 +50,18 @@ public class SqlInstruction {
 			if (stringSQL.trim().indexOf(";") >= 0) {
 
 				String tem = stringSQL.trim();
-				vecBloc = tem.split(";(\r\n)");
+				vecBloc = tem.split(";[\n\r\t\\s]");
 
 				for (int i = 0; i < vecBloc.length; i++) {
 					if (vecBloc[i].startsWith("\r")) {
-						vecBloc[i] = vecBloc[i].substring(1,
+						vecBloc[i] = vecBloc[i].substring(0,
 								vecBloc[i].length());
 						if (vecBloc[i].startsWith("\n")) {
-							vecBloc[i] = vecBloc[i].substring(1,
+							vecBloc[i] = vecBloc[i].substring(0,
 									vecBloc[i].length());
 						}
 					} else if (vecBloc[i].startsWith("\n")) {
-						vecBloc[i] = vecBloc[i].substring(1,
+						vecBloc[i] = vecBloc[i].substring(0,
 								vecBloc[i].length());
 					}
 					if (vecBloc[i].endsWith(commandTerminator)) {
@@ -78,7 +79,7 @@ public class SqlInstruction {
 					requestDTO.setBlockSQL(vecBloc);
 				} else {
 					if (mod) {
-						stringSQL = vecBloc[0];
+						stringSQL = setTextString(vecBloc[0]);
 					}
 					requestDTO.setTypeSql(0);
 				}
@@ -94,7 +95,12 @@ public class SqlInstruction {
 				&& stringSQL.toUpperCase().indexOf("ROWID") > 0) {
 			requestDTO = insertRowid(dataInstance, stringSQL, requestDTO);
 		}
+		if (requestDTO.getBlockSQL() == null
+				|| requestDTO.getBlockSQL().length < 1) {
 		requestDTO.setStringSQL(setTextString(stringSQL));
+		} else {
+			requestDTO.setStringSQL(stringSQL);
+		}
 
 		return requestDTO;
 	}
@@ -204,13 +210,13 @@ public class SqlInstruction {
 				}
 			} else {
 				vec[i] = vec[i].replaceAll("(--)+.*+([\r\n]|$)", "");
-				vec[i] = vec[i].trim().replaceAll("[\n\r\t]", " ");
+				// vec[i] = vec[i].trim().replaceAll("[\n\r\t]", " ");
 			}
 		}
 		temp = "";
 		for (int i = 0; i < vec.length; i++) {
 			temp += vec[i];
-			temp += " ";
+			temp += "\r\n";
 		}
 		return temp.trim();
 	}
@@ -234,13 +240,15 @@ public class SqlInstruction {
 	}
 
 	private String getTextString(String SQL) {
-		Pattern p1 = Pattern.compile("'+[\\w\\W][^']*'");
+		// Pattern p1 = Pattern.compile("'+[\\w\\W]+;[^']*'");
+		Pattern p1 = Pattern.compile("('')|('[\\w\\W][^']*')");
 		Matcher m1 = p1.matcher(SQL);
 		StringBuffer sb = new StringBuffer();
 		int i = 0;
+		
 		while (m1.find()) {
-			m1.appendReplacement(sb, "PR@XI@S" + i);
-			mapString.put("PR@XI@S" + i, m1.group());
+			m1.appendReplacement(sb, "'PR@XI@S" + i + "'");
+			mapString.put("'PR@XI@S" + i + "'", m1.group());
 			i++;
 		}
 		m1.appendTail(sb);
@@ -248,25 +256,84 @@ public class SqlInstruction {
 	}
 
 	private String setTextString(String SQL) {
+		// Quitar Saltos			
+		SQL = deleteComments(SQL);
+		SQL = SQL.replaceAll("[\n\r\t]", " ");
 		Iterator it = mapString.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry e = (Map.Entry) it.next();
 			String q = e.getKey().toString();
 			String w = e.getValue().toString();
+			
+			if(w.indexOf("\\") >= 0){						
+				String aux = "";
+				String vep[] = w.split("\\\\");
+				for (int i = 0; i < vep.length; i++) {
+					aux += vep[i] + "\\\\";				
+				}
+
+				w = aux;
+				w = w.substring(0, w.length() - 2);
+			}		
+			
+			if (w.indexOf("$") >= 0) {			
+
+				String tem = "";
+				String vec[] = w.split("\\$");
+				for (int i = 0; i < vec.length; i++) {
+					tem += vec[i] + "\\$";
+				}
+
+				w = tem;
+				w = w.substring(0, w.length() - 2);
+				
+			}
+			
 			SQL = SQL.replaceAll(q, w);
+			
 		}
 		return SQL;
 	}
 
 	private String[] setTextStringBlock(String SQLBlock[]) {
 		for (int i = 0; i < SQLBlock.length; i++) {
-			Iterator it = mapString.entrySet().iterator();
-			while (it.hasNext()) {
-				Map.Entry e = (Map.Entry) it.next();
-				String q = e.getKey().toString();
-				String w = e.getValue().toString();
-				SQLBlock[i] = SQLBlock[i].replaceAll(q, w);
+			// Quitar Saltos
+			SQLBlock[i] = deleteComments(SQLBlock[i]);
+			SQLBlock[i] = SQLBlock[i].replaceAll("[\n\r\t]", " ");
+			Pattern p1 = Pattern.compile("'PR@XI@S\\d*'");
+			Matcher m1 = p1.matcher(SQLBlock[i]);
+			StringBuffer sb = new StringBuffer();
+			while (m1.find()) {
+				String key = m1.group();
+				String value = mapString.get(key);
+				
+				if(value.indexOf("\\") >= 0){						
+					String auxo = "";
+					String vp[] = value.split("\\\\");
+					for (int j = 0; j < vp.length; j++) {
+						auxo += vp[j] + "\\\\";				
+					}
+
+					value = auxo;
+					value = value.substring(0, value.length() - 2);
+				}
+				
+				if (value.indexOf("$") >= 0) {
+					String tem=""; 
+					String vec[] = value.split("\\$");					 
+
+					for (int j = 0; j < vec.length; j++) {
+						tem += vec[j] + "\\$";
+					}	
+					
+					value = tem;
+					value = value.substring(0, value.length() - 2);
+				}				
+				
+				m1.appendReplacement(sb, value);
 			}
+			m1.appendTail(sb);
+			SQLBlock[i] = sb.toString();
 		}
 		return SQLBlock;
 	}

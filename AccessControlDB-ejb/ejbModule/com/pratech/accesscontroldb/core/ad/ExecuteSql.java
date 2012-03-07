@@ -19,6 +19,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import oracle.sql.RAW;
 
 import oracle.jdbc.OracleResultSet;
 import oracle.sql.CLOB;
@@ -65,6 +66,7 @@ public class ExecuteSql {
 		LogSql logSql = new LogSql();
 		Store store = new Store();
 		boolean moreResults;
+		List<String[]> lis = new ArrayList<String[]>(0);
 
 		try {
 			con = ConnectionDB.createConnection(dataInstance);
@@ -86,8 +88,7 @@ public class ExecuteSql {
 				JdbcUtil.enable_dbms_output(con, ACConstant.SIZE_BUFFER,
 						dataInstance);
 			}
-			moreResults = statement.execute(SqlInstruction
-					.deleteComments(requestDTO.getStringSQL()));
+			moreResults = statement.execute(requestDTO.getStringSQL());
 
 			if (!requestDTO.isSQLServer()) {
 				responseDto = JdbcUtil.print_dbms_output(con, responseDto,
@@ -97,10 +98,13 @@ public class ExecuteSql {
 				rs = statement.getResultSet();
 				rs.setFetchSize(requestDTO.getNumRow());
 
-				List<String[]> lis = new ArrayList<String[]>();
 				SqlResultSet sqlResultSet = new SqlResultSet();
 				lis = sqlResultSet.getList(rs, requestDTO);
-				responseDto.setListData(lis);
+				List<String[]> lis2 = new ArrayList<String[]>(lis.subList(0,
+						lis.size() <= requestDTO.getNumRow() ? lis.size()
+								: requestDTO.getNumRow() + 2));
+
+				responseDto.setListData(lis2);
 
 				responseDto.setTotalRows(rs.getRow());
 				if (!(requestDTO.getStart() > 1)) {
@@ -130,7 +134,8 @@ public class ExecuteSql {
 					logSql.setUsuario(dataInstance.get("analyst"));
 					logSql.setCamposTexto(new String[] {
 							dataInstance.get("url"), dataInstance.get("user"),
-							resu, dataInstance.get("instance"), dataInstance.get("scope") });
+							resu, dataInstance.get("instance"),
+							dataInstance.get("scope") });
 					logSql.setDescripcionAudit(requestDTO.getStringSQL());
 					logSql.setProceso("Class ExecuteSql, Procedure Execute");
 					logSql.setCod("AC2");
@@ -216,9 +221,25 @@ public class ExecuteSql {
 		}
 		if (requestDTO.getExportData() != 0) {
 			Write wri = new Write();
-			responseDto.setNameFileExport(wri.writeExcel(responseDto
-					.getListData()));
+			responseDto.setNameFileExport(wri.writeExcel(lis));
 		}
+		else
+		{
+			try{}
+			catch(Exception e){
+				responseDto.setSqlBuffer(e.getLocalizedMessage());
+				
+				logSql.setUsuario(dataInstance.get("analyst"));
+				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
+						dataInstance.get("user"), responseDto.getSqlBuffer(),
+						dataInstance.get("instance"), dataInstance.get("scope") });
+				logSql.setDescripcionAudit(requestDTO.getStringSQL());
+				logSql.setProceso("Class ExecuteSql, Excel Export");
+				logSql.setCod("AC2");
+				store.save("2", logSql);
+			}
+		}
+		
 		return responseDto;
 	}
 
@@ -447,9 +468,11 @@ public class ExecuteSql {
 		LogSql logSql = new LogSql();
 		Store store = new Store();
 		boolean moreResult;
+		System.out.println(parameters[0] + " 1");
 
 		try {
 			con = ConnectionDB.createConnection(dataInstance);
+			System.out.println("Conexion");
 			if (dataInstance.get("url").indexOf("sqlserver") < 0) {
 				IdentifyClientIdSession.identifyClientIdSession(con,
 						dataInstance);
@@ -468,16 +491,18 @@ public class ExecuteSql {
 			BufferedReader br = new BufferedReader(cl.getCharacterStream());
 
 			while ((aux = br.readLine()) != null) {
-				strOut.append(aux);
+				strOut.append(aux + "\r\n");
 			}
 			result = strOut.toString();
+			System.out.println("paso");
 
 		} catch (SQLException ex) {
 			logSql.setUsuario(dataInstance.get("analyst"));
 			logSql.setDescripcionAudit(ex.getLocalizedMessage());
 			logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
 			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
-					dataInstance.get("user"), "", dataInstance.get("instance"), dataInstance.get("scope") });
+					dataInstance.get("user"), "", dataInstance.get("instance"),
+					dataInstance.get("scope") });
 			logSql.setCod("AC3");
 			store.save("3", logSql);
 		} catch (IOException e) {
@@ -502,6 +527,7 @@ public class ExecuteSql {
 			}
 			rs = null;
 		}
+		System.out.println(result);
 		return result;
 	}
 
@@ -561,7 +587,7 @@ public class ExecuteSql {
 			String stringSQL = "";
 			for (Iterator<String> iterator = vectorSQL.iterator(); iterator
 					.hasNext();) {
-				stringSQL += (String) iterator.next();
+				stringSQL += iterator.next();
 				stringSQL += " ";
 			}
 
@@ -576,7 +602,7 @@ public class ExecuteSql {
 			BufferedReader br = new BufferedReader(cl.getCharacterStream());
 
 			while ((aux = br.readLine()) != null) {
-				strOut.append(aux);
+				strOut.append(aux + "\r\n");
 			}
 			result = strOut.toString();
 
@@ -585,7 +611,8 @@ public class ExecuteSql {
 			logSql.setDescripcionAudit(ex.getLocalizedMessage());
 			logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
 			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
-					dataInstance.get("user"), "", dataInstance.get("instance"), dataInstance.get("scope") });
+					dataInstance.get("user"), "", dataInstance.get("instance"),
+					dataInstance.get("scope") });
 			logSql.setCod("AC3");
 			store.save("3", logSql);
 		} catch (IOException e) {
@@ -783,13 +810,11 @@ public class ExecuteSql {
 
 			for (int i = 0; i < requestDTO.getBlockSQL().length; i++) {
 				try {
-					statement.execute(SqlInstruction.deleteComments(requestDTO
-							.getBlockSQL()[i]));
+					statement.execute(requestDTO.getBlockSQL()[i]);
 
 					if (!requestDTO.isCommitBlock()) {
-						lisTem.add(new String[] {
-								SqlInstruction.deleteComments(requestDTO
-										.getBlockSQL()[i]), "OK" });
+						lisTem.add(new String[] { requestDTO.getBlockSQL()[i],
+								"OK" });
 					}
 
 				} catch (SQLException e) {
@@ -810,16 +835,24 @@ public class ExecuteSql {
 				for (int i = 0; i < requestDTO.getBlockSQL().length; i++) {
 					resu += requestDTO.getBlockSQL()[i] + "; ";
 				}
+				if (requestDTO.getBlockSQL().length > 0) {
 				responseDto
-						.setSqlBuffer("All instructions were executed correctly");
+							.setSqlBuffer("Instructions were executed correctly");
 				logSql.setUsuario(dataInstance.get("analyst"));
-				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
-						dataInstance.get("user"), responseDto.getSqlBuffer(),
-						dataInstance.get("instance"), dataInstance.get("scope") });
+					logSql.setCamposTexto(new String[] {
+							dataInstance.get("url"), dataInstance.get("user"),
+							responseDto.getSqlBuffer(),
+							dataInstance.get("instance"),
+							dataInstance.get("scope") });
 				logSql.setDescripcionAudit(resu);
 				logSql.setProceso("Class ExecuteSql, Procedure Execute");
 				logSql.setCod("AC2");
 				store.save("2", logSql);
+			} else {
+					responseDto
+							.setSqlBuffer("All instructions were executed correctly");
+				}
+
 			} else {
 				responseDto.setListBlockSQL(lisTem);
 				con.rollback();
