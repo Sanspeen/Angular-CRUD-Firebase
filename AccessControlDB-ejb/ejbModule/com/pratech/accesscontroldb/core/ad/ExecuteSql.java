@@ -17,9 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import oracle.sql.RAW;
 
 import oracle.jdbc.OracleResultSet;
 import oracle.sql.CLOB;
@@ -62,7 +59,9 @@ public class ExecuteSql {
 		ResponseDTO responseDto = new ResponseDTO();
 		Connection con = null;
 		Statement statement = null;
+		Statement statementExcel = null;
 		ResultSet rs = null;
+		ResultSet rsExcel = null;
 		LogSql logSql = new LogSql();
 		Store store = new Store();
 		boolean moreResults;
@@ -79,9 +78,9 @@ public class ExecuteSql {
 			responseDto.setSqlBuffer(printAllExceptions(con.getWarnings()));
 			statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 					ResultSet.CONCUR_READ_ONLY);
-			if (requestDTO.getExportData() != 2) {
+			//if (requestDTO.getExportData() != 2) {
 				statement.setFetchSize(requestDTO.getNumRow());
-			}
+			//}
 			con.clearWarnings();
 
 			if (!requestDTO.isSQLServer()) {
@@ -203,10 +202,31 @@ public class ExecuteSql {
 				store.save("1", logSql);
 			}
 			statement = null;
+		}
+		if (requestDTO.getExportData() != 0) {
 			try {
-				con.close();
-			} catch (Exception ex) {
-				responseDto.setSqlBuffer(ex.getLocalizedMessage());
+				Write wri = new Write();
+				statementExcel = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+						ResultSet.CONCUR_READ_ONLY);
+				moreResults = statementExcel.execute(requestDTO.getStringSQL());
+				rsExcel = statementExcel.getResultSet();
+				responseDto.setNameFileExport(wri.writeExcel(rsExcel, requestDTO));
+			} catch (SQLException e) {
+				responseDto.setSqlBuffer(e.getLocalizedMessage());
+
+				logSql.setUsuario(dataInstance.get("analyst"));
+				logSql.setDescripcionAudit(requestDTO.getStringSQL());
+				logSql.setProceso("Class ExecuteSql, Procedure Execute");
+				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
+						dataInstance.get("user"), responseDto.getSqlBuffer(),
+						dataInstance.get("instance"), dataInstance.get("scope") });
+				logSql.setCod("AC3");
+				store.save("3", logSql);
+			} finally {
+				try {
+					rsExcel.close();
+				} catch (SQLException e) {
+					responseDto.setSqlBuffer(e.getLocalizedMessage());
 
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
@@ -216,12 +236,26 @@ public class ExecuteSql {
 				logSql.setProceso("Class ExecuteSql, Procedure Execute");
 				logSql.setCod("AC3");
 				store.save("1", logSql);
+				} finally {
+					rsExcel = null;
+				}
+				try {
+					statementExcel.close();
+				} catch (SQLException e) {
+					responseDto.setSqlBuffer(e.getLocalizedMessage());
+
+					logSql.setUsuario(dataInstance.get("analyst"));
+					logSql.setCamposTexto(new String[] { dataInstance.get("url"),
+							dataInstance.get("user"), responseDto.getSqlBuffer(),
+							dataInstance.get("instance"), dataInstance.get("scope") });
+					logSql.setDescripcionAudit(requestDTO.getStringSQL());
+					logSql.setProceso("Class ExecuteSql, Procedure Execute");
+					logSql.setCod("AC3");
+					store.save("1", logSql);
+				} finally {
+					statementExcel = null;
 			}
-			con = null;
 		}
-		if (requestDTO.getExportData() != 0) {
-			Write wri = new Write();
-			responseDto.setNameFileExport(wri.writeExcel(lis));
 		}
 		else
 		{
@@ -239,6 +273,22 @@ public class ExecuteSql {
 				store.save("2", logSql);
 			}
 		}
+		
+		try {
+			con.close();
+		} catch (Exception ex) {
+			responseDto.setSqlBuffer(ex.getLocalizedMessage());
+
+			logSql.setUsuario(dataInstance.get("analyst"));
+			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
+					dataInstance.get("user"), responseDto.getSqlBuffer(),
+					dataInstance.get("instance"), dataInstance.get("scope") });
+			logSql.setDescripcionAudit(requestDTO.getStringSQL());
+			logSql.setProceso("Class ExecuteSql, Procedure Execute");
+			logSql.setCod("AC3");
+			store.save("1", logSql);
+		}
+		con = null;
 		
 		return responseDto;
 	}

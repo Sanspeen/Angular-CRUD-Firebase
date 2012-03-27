@@ -13,6 +13,7 @@ public class ACConstant {
 	public static final String PATH_CONFIG = "/oracle/home/APLIC/escritura/accesscontroldb/confi.properties";
 	public static final String PATH_FUENTE = "/oracle/home/APLIC/escritura/accesscontroldb/dataFuente.xml";
 	public static final String PATH_NUFUENTE = "/oracle/home/APLIC/escritura/accesscontroldb/dataNumeroFuente.xml";
+	public static final String PATH_INSTANCES = "/oracle/home/APLIC/escritura/accesscontroldb/dataInstances.xml";
 	/** Tamaño del buffer para la salida de mensajes de ORACLE*/
 	public static final int SIZE_BUFFER = 200000;
 }

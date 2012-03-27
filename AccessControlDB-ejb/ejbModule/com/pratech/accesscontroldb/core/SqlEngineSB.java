@@ -13,7 +13,6 @@ import com.pratech.accesscontroldb.core.connection.ConnectionDB;
 import com.pratech.accesscontroldb.persistence.DeleteFile;
 import com.pratech.accesscontroldb.persistence.Store;
 import com.pratech.accesscontroldb.persistence.XMLData;
-import com.pratech.accesscontroldb.util.InfoSession;
 import com.pratech.accesscontroldb.util.SqlInstruction;
 
 import java.sql.Connection;
@@ -25,7 +24,7 @@ import java.util.Map;
 import javax.ejb.Stateful;
 
 /**
- * Esta clase está a la espera de ser llamado desde GWT
+ * Esta clase está a la espera de ser llamado desde GWT.
  * 
  * @since 2011-07-01
  * @author Diego Alberto Piedrahita
@@ -102,24 +101,24 @@ public class SqlEngineSB implements SqlEngineSBLocal {
 	 * @return = Lista de ambientes
 	 */
 	public List<String> listAmbi() {
-		InfoSession listInstances = new InfoSession();
+		XMLData listInstances = new XMLData();
 		List<String> lisAm = new ArrayList<String>();
-		lisAm = listInstances.getAmbiente();
+		lisAm = listInstances.getXMLAmbientes();
 		return lisAm;
 	}
 
 	/**
 	 * Lista la informacion de las instancias
 	 * 
-	 * @param dat
+	 * @param env
 	 *            = codigo del ambiente
 	 * @return = Lista de instancias
 	 * 
 	 */
-	public List<String> listInst(String dat) {
-		InfoSession listInstances = new InfoSession();
+	public List<String> listInst(String env) {
+		XMLData listInstances = new XMLData();
 		List<String> lisInst = new ArrayList<String>();
-		lisInst = listInstances.getInstancias(dat);
+		lisInst = listInstances.readXMLInstances(env);
 		return lisInst;
 	}
 
@@ -137,10 +136,13 @@ public class SqlEngineSB implements SqlEngineSBLocal {
 	 */
 	public String[] connectionEntry(DataConnection dataConnection) {
 
+		XMLData xmlData = new XMLData();
+		
 		setDataInstance(dataConnection);
 
 		urlConnection urlConnection = new urlConnection();
-		String url = urlConnection.URLSearch(dataInstance);
+		//String url = urlConnection.URLSearch(dataInstance);
+		String url = xmlData.readURLXML(dataInstance.get("scope").trim(), dataInstance.get("instance").trim());
 
 		dataInstance.put("url",url);
 
@@ -265,5 +267,10 @@ public class SqlEngineSB implements SqlEngineSBLocal {
 		}
 		ExecuteSql executeSql = new ExecuteSql();
 		return executeSql.getXMLType(parameters, dataInstance);
+	}
+
+	public String validateInstancesXMLFile() {
+		XMLData xmlData = new XMLData();
+		return xmlData.validateXMLInstances(null);
 	}
 }

@@ -17,7 +17,7 @@ public class IdentifyClientIdSession {
 		try {
 			String SP = "{call dbms_session.set_identifier(?)}";
 			cstmt = con.prepareCall(SP);
-			cstmt.setString(1, dataInstance.get("analyst").trim()
+			cstmt.setString(1, (dataInstance.get("analyst") != null? dataInstance.get("analyst").trim() : "")
 					+ ":AccessControlDB:" + dataInstance.get("ip").trim());
 			cstmt.execute();
 		} catch (Exception e) {

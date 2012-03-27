@@ -202,7 +202,7 @@ public class AccessControlDB_war implements EntryPoint {
 	private Button btnPrevious = new Button();
 
 	private PasswordTextBox txtPassword = new PasswordTextBox();
-	private Boolean valid = false;
+	private Boolean validationMessage = false;
 
 	private int intPage = 1;
 	private int intRowsPerPage;
@@ -323,7 +323,7 @@ public class AccessControlDB_war implements EntryPoint {
 									if (responseDTO.getNameFileExport()
 											.length() > 0) {
 										Window.open(GWT.getHostPageBaseURL()
-												+ "/../"
+													+ "/ExcelSender?filename="
 												+ responseDTO
 														.getNameFileExport()
 														.trim(), "Export", "");
@@ -368,12 +368,12 @@ public class AccessControlDB_war implements EntryPoint {
 		lisInstance.setSelectedIndex(0);
 		grid.setWidget(1, 1, lisInstance);
 
-		Label lblSource = new Label("Fuente del Ingreso a producci\u00F3n. *");
+		Label lblSource = new Label("Causa del Ingreso a producci\u00F3n *");
 		grid.setWidget(2, 0, lblSource);
 
 		grid.setWidget(2, 1, lisSource);
 
-		Label lblSourceNumber = new Label("Nro. Fuente Ingreso *");
+		Label lblSourceNumber = new Label("Nro. de ticket, requerimiento o explicaci\u00F3n *");
 		grid.setWidget(3, 0, lblSourceNumber);
 
 		txtSourceNumber.setText("");
@@ -720,6 +720,24 @@ public class AccessControlDB_war implements EntryPoint {
 	/**
 	 * Validates the login information section
 	 */
+	private void validateXMLInstancesFile() {
+		sqlEng.validateInstancesXMLFile(new AsyncCallback<String>() {
+
+			public void onFailure(Throwable caught) {
+				Window.alert(caught.getLocalizedMessage());
+			}
+
+			public void onSuccess(String validationMessage) {
+				if (validationMessage != null) {
+					Window.alert(validationMessage);
+				}
+			}
+		});
+	}
+	
+	/**
+	 * Validates the login information section
+	 */
 	private void validateIncome() {
 		// String token = Cookies.getCookie("eoSessionCookie");
 		sqlEng.isUserAdmin(new AsyncCallback<String[]>() {
@@ -729,9 +747,9 @@ public class AccessControlDB_war implements EntryPoint {
 			}
 
 			public void onSuccess(String[] resul) {
-				valid = (resul != null);
+				validationMessage = (resul != null);
 
-				if (valid) {
+				if (validationMessage) {
 					dataConnection.setAnalyst(resul[1]);
 					dataConnection.setUserName(resul[0]);
 					rootMain();
@@ -796,6 +814,7 @@ public class AccessControlDB_war implements EntryPoint {
 		bitacora.setAnimationEnabled(true);
 		bitacora.center();
 		bitacora.show();
+		validateXMLInstancesFile();
 
 		horizontalPanel.add(verticalPanel_1);
 
@@ -1119,7 +1138,7 @@ public class AccessControlDB_war implements EntryPoint {
 	private boolean validateText() {
 		boolean valid = true;
 
-		if (dataConnection.getApplication().length() < 1) {
+		if (dataConnection.getApplication().trim().length() < 1) {
 			txtApplicacion.setStyleName("textFill");
 			valid = false;
 		} else {
@@ -1130,7 +1149,7 @@ public class AccessControlDB_war implements EntryPoint {
 			lisScope.setStyleName("textFillLis");
 			valid = false;
 		} else {
-			if (dataConnection.getScope().length() < 1) {
+			if (dataConnection.getScope().trim().length() < 1) {
 				lisScope.setStyleName("textFillLis");
 				valid = false;
 			} else {
@@ -1142,7 +1161,7 @@ public class AccessControlDB_war implements EntryPoint {
 			lisInstance.setStyleName("textFillLis");
 			valid = false;
 		} else {
-			if (dataConnection.getInstance().length() < 1) {
+			if (dataConnection.getInstance().trim().length() < 1) {
 				lisInstance.setStyleName("textFillLis");
 				valid = false;
 			} else {
@@ -1161,7 +1180,7 @@ public class AccessControlDB_war implements EntryPoint {
 			txtSourceNumber.setStyleName("textFill");
 			valid = false;
 		} else {
-			if (dataConnection.getScope().length() < 1) {
+			if (dataConnection.getScope().trim().length() < 1) {
 				txtSourceNumber.setStyleName("textFill");
 				valid = false;
 			} else {
@@ -1173,7 +1192,7 @@ public class AccessControlDB_war implements EntryPoint {
 			lisSolution.setStyleName("textFillLis");
 			valid = false;
 		} else {
-			if (dataConnection.getSolution().length() < 1) {
+			if (dataConnection.getSolution().trim().length() < 1) {
 				lisSolution.setStyleName("textFillLis");
 				valid = false;
 			} else {
@@ -1185,7 +1204,7 @@ public class AccessControlDB_war implements EntryPoint {
 			lisSource.setStyleName("textFillLis");
 			valid = false;
 		} else {
-			if (dataConnection.getSource().length() < 1) {
+			if (dataConnection.getSource().trim().length() < 1) {
 				lisSource.setStyleName("textFillLis");
 				valid = false;
 			} else {
@@ -1193,14 +1212,14 @@ public class AccessControlDB_war implements EntryPoint {
 			}
 		}
 
-		if (dataConnection.getSourceNumber().length() < 1) {
+		if (dataConnection.getSourceNumber().trim().length() < 1) {
 			txtSourceNumber.setStyleName("textFill");
 			valid = false;
 		} else {
 			txtSourceNumber.setStyleName("textOk");
 		}
 
-		if (dataConnection.getUser().length() < 1) {
+		if (dataConnection.getUser().trim().length() < 1) {
 			txtUser.setStyleName("textFill");
 			valid = false;
 		} else {

@@ -27,17 +27,23 @@ import oracle.sql.ROWID;
 public class SqlResultSet {
 
 	/**
-	 * Recorre un ResultSet y lo pasa a una lista de String[], ademas se encarga
-	 * de la paginacion.
+	 * Recorre un ResultSet y lo pasa a una lista de String[], además se encarga
+	 * de la paginación.
 	 * 
 	 * @param rs
 	 * @param requestDTO
 	 * @return
+	 * @throws SQLException 
 	 */
-	public List<String[]> getList(ResultSet rs, RequestDTO requestDTO) {
+	public List<String[]> getList(ResultSet rs, RequestDTO requestDTO) throws SQLException {
+		
 		List<String[]> dataLi = new ArrayList<String[]>();
-		try {
+
 			boolean more;
+		String[] rowTypes;
+		String[] rowTitles;
+		String[] row;
+		
 			if (requestDTO.getExportData() == 2) {
 				more = rs.absolute(1);
 			} else {
@@ -47,23 +53,77 @@ public class SqlResultSet {
 				ResultSetMetaData rsmd = rs.getMetaData();
 				int colCount = rsmd.getColumnCount();
 
-				String[] row1 = new String[colCount + 1];
+			rowTypes = readTypes(rsmd, colCount);
+			dataLi.add(rowTypes);
+
+			rowTitles = readTitles(rsmd, colCount);
+			dataLi.add(rowTitles);
+
+			int countAdds = 0;
+
+			while (more) {
+				
+				row = readRow(rs, requestDTO, colCount);
+				dataLi.add(row);
+
+				if (++countAdds == requestDTO.getNumRow()) {
+					break;
+				}
+				more = rs.next();
+			}
+		}
+
+		return dataLi;
+	}
+
+	/**
+	 * Lee los encabezados de las columnas del ResultSet.
+	 * 
+	 * @param rsmd
+	 * @param colCount
+	 * @return
+	 * @throws SQLException
+	 */
+	public static String[] readTitles(ResultSetMetaData rsmd, int colCount)
+			throws SQLException {
+		String[] rowTitles;
+		rowTitles = new String[colCount + 1];
+		rowTitles[0] = "ID";
+				for (int i = 1; i <= colCount; i++) {
+			rowTitles[i] = rsmd.getColumnName(i);
+		}
+		return rowTitles;
+				}
+
+	/**
+	 * Lee los tipos de las columnas del ResultSet.
+	 * 
+	 * @param rsmd
+	 * @param colCount
+	 * @return
+	 * @throws SQLException
+	 */
+	public static String[] readTypes(ResultSetMetaData rsmd, int colCount)
+			throws SQLException {
+		String[] row1 = new String[colCount + 1];
 				row1[0] = "ID";
 				for (int i = 1; i <= colCount; i++) {
-					row1[i] = rsmd.getColumnTypeName(i);
+			row1[i] = rsmd.getColumnTypeName(i);
+		}
+		return row1;
 				}
-				dataLi.add(row1);
 
-				row1 = new String[colCount + 1];
-				row1[0] = "ID";
-				for (int i = 1; i <= colCount; i++) {
-					row1[i] = rsmd.getColumnName(i);
-				}
-				dataLi.add(row1);
-
-				int countAdds = 0;
-
-				while (more) {
+	/**
+	 * Lee una fila de un ResultSet y lo pasa a una lista de String[].
+	 * 
+	 * @param rs
+	 * @param requestDTO
+	 * @param colCount
+	 * @return
+	 * @throws SQLException
+	 */
+	public static String[] readRow(ResultSet rs, RequestDTO requestDTO, int colCount)
+			throws SQLException {
 					String[] row = new String[colCount + 1];
 					row[0] = rs.getRow() + "";
 					for (int i = 1; i <= colCount; i++) {
@@ -108,21 +168,6 @@ public class SqlResultSet {
 							row[i] = "";
 						}
 					}
-					dataLi.add(row);
-
-					if (requestDTO.getExportData() != 2) {
-						if (++countAdds == requestDTO.getNumRow()) {
-							break;
-						}
-					}
-					more = rs.next();
-				}
-			}
-
-		} catch (SQLException ex) {
-			Logger.getLogger(SqlResultSet.class.getName()).log(Level.SEVERE,
-					null, ex);
-		}
-		return dataLi;
+		return row;
 	}
 }

@@ -9,6 +9,7 @@ import com.pratech.accesscontroldb.client.DTO.RequestDTO;
 import com.pratech.accesscontroldb.client.DTO.ResponseDTO;
 import com.pratech.accesscontroldb.common.Configuration;
 import com.pratech.accesscontroldb.core.SqlEngineSB;
+import com.pratech.accesscontroldb.persistence.XMLData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,6 +88,18 @@ public class SqlEngineServiceImpl extends RemoteServiceServlet implements
 		return lisInst;
 	}
 
+	public String updateInstancesXMLFile() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public String validateInstancesXMLFile() {
+		String validation;
+		SqlEngineSB sqlEngineSB = new SqlEngineSB();
+		validation = sqlEngineSB.validateInstancesXMLFile();
+		return validation;
+	}
+	
 	public List<String[]> listComb() {
 		SqlEngineSB sqlEngineSB = new SqlEngineSB();
 		return sqlEngineSB.listComb();
@@ -139,6 +152,7 @@ public class SqlEngineServiceImpl extends RemoteServiceServlet implements
 
 	public String[] isUserAdmin() {
 
+		try {
 		String urlReferer = getThreadLocalRequest().getHeader("referer");
 
 		String token = urlReferer.toLowerCase().replaceAll("^.*\\?id=", "")
@@ -153,6 +167,10 @@ public class SqlEngineServiceImpl extends RemoteServiceServlet implements
 
 		return new String[] { userSeus.getName().getValue(),
 				userSeus.getLogin().getValue() };
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	public String greetServer(String input) throws IllegalArgumentException {

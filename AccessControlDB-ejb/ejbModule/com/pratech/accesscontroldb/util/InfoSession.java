@@ -3,6 +3,7 @@ package com.pratech.accesscontroldb.util;
 import com.pratech.accesscontroldb.common.ACConfig;
 import com.pratech.accesscontroldb.core.connection.ConnectionDB;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -31,7 +32,7 @@ public class InfoSession {
 	 * 
 	 * @return List String
 	 */
-	public List<String> getAmbiente() {
+	public List<String> getAmbiente_() {
 		Connection con = null;
 		Statement statement = null;
 		ResultSet rs = null;
@@ -79,7 +80,7 @@ public class InfoSession {
 	 * @param ambiente
 	 * @return List
 	 */
-	public List<String> getInstancias(String ambiente) {
+	public List<String> getInstancias_(String ambiente) {
 		Connection con = null;
 		Statement statement = null;
 		ResultSet rs = null;
@@ -123,5 +124,73 @@ public class InfoSession {
 			con = null;
 		}
 		return listInstancias;
+	}
+	
+	/**
+	 * Exporta las instancias como XML de la tabla que las contiene.
+	 * 
+	 * @param ambiente
+	 * @return List
+	 */
+	public String[] getXMLInstances() {
+		Connection con = null;
+		PreparedStatement statement = null;
+		ResultSet rs = null;
+		List<String> ambientes;
+		int cdAmbiente;
+		StringBuffer xmlInstancias = new StringBuffer();
+		String[] result = new String[2];
+
+		try {
+			ambientes = getAmbiente_();
+			con = ConnectionDB.createConnection(dataInstance);
+			String StrSQLXML = ACConfig.getValue("SQLXMLIntanciasPorAmbiente");
+			statement = con.prepareStatement(StrSQLXML);
+			
+			for (String ambiente : ambientes)
+			{
+				cdAmbiente = Integer.parseInt(ACConfig.getValue(ambiente));
+				statement.setInt(1, cdAmbiente);
+				statement.setInt(2, cdAmbiente);
+				boolean moreResults = statement.execute();
+				if (moreResults)
+				{
+					rs = statement.getResultSet();
+					rs.next();
+					xmlInstancias.append(rs.getString(1));
+					try {
+						rs.close();
+					} catch (Exception ex) {
+					}
+					rs = null;
+				}
+				statement.clearParameters();
+			}
+
+		} catch (SQLException ex) {
+			Logger.getLogger("Error_Instancias").log(Level.SEVERE, null, ex);
+		} finally {
+			try {
+				rs.close();
+			} catch (Exception ex) {
+			}
+			rs = null;
+			try {
+				statement.close();
+			} catch (Exception ex) {
+			}
+			statement = null;
+			try {
+				con.close();
+			} catch (Exception ex) {
+			}
+			con = null;
+		}
+		
+		String xmlAmbientes = "<environments>" + xmlInstancias.toString() + "</environments>";
+		result[0] = xmlAmbientes;
+		result[1] = "&Eacute;xito actualizando archivo de instancias.";
+		//TODO: recargar de ser necesario archivo.
+		return result;
 	}
 }

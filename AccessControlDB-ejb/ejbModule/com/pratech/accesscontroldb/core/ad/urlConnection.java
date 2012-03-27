@@ -28,7 +28,7 @@ public class urlConnection {
 	 * @param dataInstance = datos de la instancia que se desea conectar.
 	 * @return  URL
 	 */
-	public String URLSearch(Map<String, String> dataInstance) {
+	public String URLSearch_(Map<String, String> dataInstance) {
 		Connection con = null;
 		Statement statement = null;
 		ResultSet rs = null;

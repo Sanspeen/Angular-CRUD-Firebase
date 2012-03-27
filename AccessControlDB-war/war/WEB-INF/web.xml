@@ -11,8 +11,15 @@
 		<servlet-name>SqlEngineService</servlet-name>
 		<url-pattern>/accesscontroldb_war/sqlengineservice</url-pattern>
 	</servlet-mapping>
-
-	<!-- Default page to serve -->
+  <servlet>
+    <display-name>ExcelSender</display-name>
+    <servlet-name>ExcelSender</servlet-name>
+    <servlet-class>com.pratech.accesscontroldb.server.ExcelSender</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ExcelSender</servlet-name>
+    <url-pattern>/ExcelSender</url-pattern>
+  </servlet-mapping>
 	<welcome-file-list>
 		<welcome-file>AccessControlDB_war.html</welcome-file>
 	</welcome-file-list>
