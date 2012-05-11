@@ -96,6 +96,14 @@ public class LogSql extends DTO {
 	}
 
 	/**
+	 * @param transaccion
+	 *            the transaccion to set
+	 */
+	public void setTransaccion(String transaccion) {
+		this.transaccion = Long.parseLong(transaccion);
+	}
+
+	/**
 	 * @return the proceso
 	 */
 	public String getProceso() {

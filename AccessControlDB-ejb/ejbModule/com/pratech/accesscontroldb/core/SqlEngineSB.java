@@ -8,7 +8,6 @@ import com.pratech.accesscontroldb.DTO.ResponseDTO;
 import com.pratech.accesscontroldb.common.ACConfig;
 import com.pratech.accesscontroldb.core.ad.ExecuteSql;
 import com.pratech.accesscontroldb.core.ad.IdentifyClientIdSession;
-import com.pratech.accesscontroldb.core.ad.urlConnection;
 import com.pratech.accesscontroldb.core.connection.ConnectionDB;
 import com.pratech.accesscontroldb.persistence.DeleteFile;
 import com.pratech.accesscontroldb.persistence.Store;
@@ -22,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ejb.Stateful;
+
+import suramericana.cronos.utilidades.GeneradorCodigos;
 
 /**
  * Esta clase está a la espera de ser llamado desde GWT.
@@ -137,24 +138,30 @@ public class SqlEngineSB implements SqlEngineSBLocal {
 	public String[] connectionEntry(DataConnection dataConnection) {
 
 		XMLData xmlData = new XMLData();
-		
+		StringBuffer errorDetail = new StringBuffer();
+		long transaccion = 0;
 		setDataInstance(dataConnection);
-
-		urlConnection urlConnection = new urlConnection();
-		//String url = urlConnection.URLSearch(dataInstance);
 		String url = xmlData.readURLXML(dataInstance.get("scope").trim(), dataInstance.get("instance").trim());
 
 		dataInstance.put("url",url);
 
 		if (url.length() > 0) {
 			Store store = new Store();
-			Connection cn = ConnectionDB.createConnection(dataInstance);
+			Connection cn = ConnectionDB.createConnection(dataInstance, errorDetail);
 			if (url.indexOf("sqlserver") < 0) {
 				IdentifyClientIdSession.identifyClientIdSession(cn,
 						dataInstance);
 			}
 			if (cn != null) {
 				LogSql logSql = new LogSql();
+				transaccion = GeneradorCodigos.generarIdTransaccion();
+				//El campo transaccion debe manejarse con una longitud máxima de 15 caracteres
+				String strTransaccion = Long.toString(transaccion);
+				if (strTransaccion.length() > 15) {
+					strTransaccion.substring(strTransaccion.length() - 15, strTransaccion.length());
+					transaccion = Long.parseLong(strTransaccion);
+				}
+				logSql.setTransaccion(transaccion);
 				logSql.setDescripcionAudit("Logeo de conexion");
 				logSql.setUsuario(dataConnection.getAnalyst());
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
@@ -163,7 +170,14 @@ public class SqlEngineSB implements SqlEngineSBLocal {
 						dataInstance.get("scope"),
 						dataInstance.get("sourceNumber"),
 						dataInstance.get("solution"),
-						dataInstance.get("application") });
+						dataInstance.get("application"),
+						dataInstance.get("team") != null && dataInstance.get("team").length() > 255? 
+								dataInstance.get("team").substring(0, 255)
+								: dataInstance.get("team"), //longitud máxima de team es 255
+						dataInstance.get("observations") != null && dataInstance.get("observations").length() > 255? 
+								dataInstance.get("observations").substring(0, 255)
+								: dataInstance.get("observations") //longitud máxima de observations es 255
+				});
 				logSql.setCod("AC1");
 				store.save("1", logSql);
 			}
@@ -178,7 +192,7 @@ public class SqlEngineSB implements SqlEngineSBLocal {
 		if (url.toUpperCase().indexOf("SQLSERVER") < 0) {
 			isSQLServer = "0";
 		}
-		return new String[] { url, ACConfig.getValue("numRows"), isSQLServer };
+		return new String[] { url, ACConfig.getValue("numRows"), isSQLServer, transaccion + "", errorDetail.toString() };
 	}
 
 	/**
@@ -246,6 +260,9 @@ public class SqlEngineSB implements SqlEngineSBLocal {
 		dataInstance.put("scope", dataConnection.getScope());
 		dataInstance.put("url", dataConnection.getUrl());
 		dataInstance.put("ip", dataConnection.getIpUser());
+		dataInstance.put("team", dataConnection.getTeam());
+		dataInstance.put("observations", dataConnection.getObservations());
+		dataInstance.put("transaction", dataConnection.getTransaction());
 	}
 
 	public void deleteFileExcel(String nameFile) {
@@ -273,4 +290,11 @@ public class SqlEngineSB implements SqlEngineSBLocal {
 		XMLData xmlData = new XMLData();
 		return xmlData.validateXMLInstances(null);
 	}
+
+	public String updateInstancesXML() {
+		XMLData xmlData = new XMLData();
+		String message = xmlData.updateInstancesXML();
+		return message;
+	}
+	
 }

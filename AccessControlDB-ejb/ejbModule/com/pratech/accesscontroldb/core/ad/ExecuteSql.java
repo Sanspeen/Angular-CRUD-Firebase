@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import oracle.jdbc.OracleResultSet;
 import oracle.sql.CLOB;
@@ -68,7 +70,7 @@ public class ExecuteSql {
 		List<String[]> lis = new ArrayList<String[]>(0);
 
 		try {
-			con = ConnectionDB.createConnection(dataInstance);
+			con = ConnectionDB.createConnection(dataInstance, null);
 			if (!requestDTO.isSQLServer()) {
 				IdentifyClientIdSession.identifyClientIdSession(con,
 						dataInstance);
@@ -99,14 +101,13 @@ public class ExecuteSql {
 
 				SqlResultSet sqlResultSet = new SqlResultSet();
 				lis = sqlResultSet.getList(rs, requestDTO);
-				List<String[]> lis2 = new ArrayList<String[]>(lis.subList(0,
-						lis.size() <= requestDTO.getNumRow() ? lis.size()
-								: requestDTO.getNumRow() + 2));
-
-				responseDto.setListData(lis2);
+				//sqlResultSet.getList() retorna la cantidad
+				//de filas de dartos indicada por requestDTO.getNumRow()
+				responseDto.setListData(lis);
 
 				responseDto.setTotalRows(rs.getRow());
 				if (!(requestDTO.getStart() > 1)) {
+					logSql.setTransaccion(dataInstance.get("transaction"));
 					logSql.setUsuario(dataInstance.get("analyst"));
 					logSql.setDescripcionAudit(requestDTO.getStringSQL());
 					logSql.setProceso("Class ExecuteSql, Procedure Execute");
@@ -130,6 +131,7 @@ public class ExecuteSql {
 
 					responseDto.setSqlBuffer(resu);
 
+					logSql.setTransaccion(dataInstance.get("transaction"));
 					logSql.setUsuario(dataInstance.get("analyst"));
 					logSql.setCamposTexto(new String[] {
 							dataInstance.get("url"), dataInstance.get("user"),
@@ -150,6 +152,7 @@ public class ExecuteSql {
 		} catch (SQLException ex) {
 			responseDto.setSqlBuffer(ex.getLocalizedMessage());
 
+			logSql.setTransaccion(dataInstance.get("transaction"));
 			logSql.setUsuario(dataInstance.get("analyst"));
 			logSql.setDescripcionAudit(requestDTO.getStringSQL());
 			logSql.setProceso("Class ExecuteSql, Procedure Execute");
@@ -164,6 +167,7 @@ public class ExecuteSql {
 			} catch (Exception e) {
 				responseDto.setSqlBuffer(e.getLocalizedMessage());
 
+				logSql.setTransaccion(dataInstance.get("transaction"));
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
@@ -176,6 +180,7 @@ public class ExecuteSql {
 		} catch (Exception e) {
 			responseDto.setSqlBuffer(e.getLocalizedMessage());
 
+			logSql.setTransaccion(dataInstance.get("transaction"));
 			logSql.setUsuario(dataInstance.get("analyst"));
 			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 					dataInstance.get("user"), responseDto.getSqlBuffer(),
@@ -192,6 +197,7 @@ public class ExecuteSql {
 			} catch (Exception ex) {
 				responseDto.setSqlBuffer(ex.getLocalizedMessage());
 
+				logSql.setTransaccion(dataInstance.get("transaction"));
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
@@ -212,8 +218,27 @@ public class ExecuteSql {
 				rsExcel = statementExcel.getResultSet();
 				responseDto.setNameFileExport(wri.writeExcel(rsExcel, requestDTO));
 			} catch (SQLException e) {
+				Logger.getLogger(SqlResultSet.class.getName()).log(Level.SEVERE,
+						null, e);
+				responseDto.setNameFileExport("<error>");
 				responseDto.setSqlBuffer(e.getLocalizedMessage());
 
+				logSql.setTransaccion(dataInstance.get("transaction"));
+				logSql.setUsuario(dataInstance.get("analyst"));
+				logSql.setDescripcionAudit(requestDTO.getStringSQL());
+				logSql.setProceso("Class ExecuteSql, Procedure Execute");
+				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
+						dataInstance.get("user"), responseDto.getSqlBuffer(),
+						dataInstance.get("instance"), dataInstance.get("scope") });
+				logSql.setCod("AC3");
+				store.save("3", logSql);
+			} catch (Exception e) {
+				Logger.getLogger(SqlResultSet.class.getName()).log(Level.SEVERE,
+						null, e);
+				responseDto.setNameFileExport("<error>");
+				responseDto.setSqlBuffer(e.getLocalizedMessage());
+
+				logSql.setTransaccion(dataInstance.get("transaction"));
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setDescripcionAudit(requestDTO.getStringSQL());
 				logSql.setProceso("Class ExecuteSql, Procedure Execute");
@@ -228,6 +253,7 @@ public class ExecuteSql {
 				} catch (SQLException e) {
 					responseDto.setSqlBuffer(e.getLocalizedMessage());
 
+				logSql.setTransaccion(dataInstance.get("transaction"));
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
@@ -244,6 +270,7 @@ public class ExecuteSql {
 				} catch (SQLException e) {
 					responseDto.setSqlBuffer(e.getLocalizedMessage());
 
+					logSql.setTransaccion(dataInstance.get("transaction"));
 					logSql.setUsuario(dataInstance.get("analyst"));
 					logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 							dataInstance.get("user"), responseDto.getSqlBuffer(),
@@ -257,28 +284,13 @@ public class ExecuteSql {
 			}
 		}
 		}
-		else
-		{
-			try{}
-			catch(Exception e){
-				responseDto.setSqlBuffer(e.getLocalizedMessage());
-				
-				logSql.setUsuario(dataInstance.get("analyst"));
-				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
-						dataInstance.get("user"), responseDto.getSqlBuffer(),
-						dataInstance.get("instance"), dataInstance.get("scope") });
-				logSql.setDescripcionAudit(requestDTO.getStringSQL());
-				logSql.setProceso("Class ExecuteSql, Excel Export");
-				logSql.setCod("AC2");
-				store.save("2", logSql);
-			}
-		}
 		
 		try {
 			con.close();
 		} catch (Exception ex) {
 			responseDto.setSqlBuffer(ex.getLocalizedMessage());
 
+			logSql.setTransaccion(dataInstance.get("transaction"));
 			logSql.setUsuario(dataInstance.get("analyst"));
 			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 					dataInstance.get("user"), responseDto.getSqlBuffer(),
@@ -300,7 +312,7 @@ public class ExecuteSql {
 	 * @return
 	 */
 
-	private String printAllExceptions(SQLException sqle) {
+	public static String printAllExceptions(SQLException sqle) {
 		StringBuffer buffer = new StringBuffer();
 
 		while (sqle != null) {
@@ -340,9 +352,10 @@ public class ExecuteSql {
 		Store store = new Store();
 		String SQL = "";
 		String SQLCronos = "";
+		String numberDetail = null;
 
 		try {
-			con = ConnectionDB.createConnection(dataInstance);
+			con = ConnectionDB.createConnection(dataInstance, null);
 			IdentifyClientIdSession.identifyClientIdSession(con, dataInstance);
 			con.setAutoCommit(false);
 
@@ -367,6 +380,7 @@ public class ExecuteSql {
 
 				ps = con.prepareStatement(SQL);
 				if (listStr[2].equals("NUMBER")) {
+					numberDetail = listStr[0].trim();
 					BigDecimal bid = new BigDecimal(listStr[0].trim());
 					ps.setBigDecimal(1, bid);
 				} else if (listStr[2].equals("VARCHAR2")) {
@@ -417,6 +431,7 @@ public class ExecuteSql {
 				if (romAfe > 0) {
 					responseDto.setSqlBuffer("Succesfully modified records");
 				}
+				logSql.setTransaccion(dataInstance.get("transaction"));
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setDescripcionAudit(SQLCronos + "; " + SQLSelect);
 				logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
@@ -431,6 +446,7 @@ public class ExecuteSql {
 		} catch (SQLException ex) {
 			responseDto.setSqlBuffer(ex.getLocalizedMessage());
 
+			logSql.setTransaccion(dataInstance.get("transaction"));
 			logSql.setUsuario(dataInstance.get("analyst"));
 			logSql.setDescripcionAudit(SQLCronos + "; " + SQLSelect);
 			logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
@@ -445,6 +461,7 @@ public class ExecuteSql {
 			} catch (Exception e) {
 				responseDto.setSqlBuffer(e.getLocalizedMessage());
 
+				logSql.setTransaccion(dataInstance.get("transaction"));
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
@@ -455,8 +472,12 @@ public class ExecuteSql {
 				store.save("1", logSql);
 			}
 		} catch (Exception e) {
+			if (e instanceof NumberFormatException)
+				responseDto.setSqlBuffer("Unparseable number: \"" + numberDetail + "\"");
+			else
 			responseDto.setSqlBuffer(e.getLocalizedMessage());
 
+			logSql.setTransaccion(dataInstance.get("transaction"));
 			logSql.setUsuario(dataInstance.get("analyst"));
 			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 					dataInstance.get("user"), responseDto.getSqlBuffer(),
@@ -473,6 +494,7 @@ public class ExecuteSql {
 			} catch (Exception ex) {
 				responseDto.setSqlBuffer(ex.getLocalizedMessage());
 
+				logSql.setTransaccion(dataInstance.get("transaction"));
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
@@ -488,6 +510,7 @@ public class ExecuteSql {
 			} catch (Exception ex) {
 				responseDto.setSqlBuffer(ex.getLocalizedMessage());
 
+				logSql.setTransaccion(dataInstance.get("transaction"));
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
@@ -521,7 +544,7 @@ public class ExecuteSql {
 		System.out.println(parameters[0] + " 1");
 
 		try {
-			con = ConnectionDB.createConnection(dataInstance);
+			con = ConnectionDB.createConnection(dataInstance, null);
 			System.out.println("Conexion");
 			if (dataInstance.get("url").indexOf("sqlserver") < 0) {
 				IdentifyClientIdSession.identifyClientIdSession(con,
@@ -547,6 +570,7 @@ public class ExecuteSql {
 			System.out.println("paso");
 
 		} catch (SQLException ex) {
+			logSql.setTransaccion(dataInstance.get("transaction"));
 			logSql.setUsuario(dataInstance.get("analyst"));
 			logSql.setDescripcionAudit(ex.getLocalizedMessage());
 			logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
@@ -598,7 +622,7 @@ public class ExecuteSql {
 		Store store = new Store();
 
 		try {
-			con = ConnectionDB.createConnection(dataInstance);
+			con = ConnectionDB.createConnection(dataInstance, null);
 			if (dataInstance.get("url").indexOf("sqlserver") < 0) {
 				IdentifyClientIdSession.identifyClientIdSession(con,
 						dataInstance);
@@ -657,6 +681,7 @@ public class ExecuteSql {
 			result = strOut.toString();
 
 		} catch (SQLException ex) {
+			logSql.setTransaccion(dataInstance.get("transaction"));
 			logSql.setUsuario(dataInstance.get("analyst"));
 			logSql.setDescripcionAudit(ex.getLocalizedMessage());
 			logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
@@ -722,7 +747,7 @@ public class ExecuteSql {
 		listData.add(new String[] { "", "", "Valores" });
 
 		try {
-			con = ConnectionDB.createConnection(dataInstance);
+			con = ConnectionDB.createConnection(dataInstance, null);
 			if (dataInstance.get("url").indexOf("sqlserver") < 0) {
 				IdentifyClientIdSession.identifyClientIdSession(con,
 						dataInstance);
@@ -765,6 +790,7 @@ public class ExecuteSql {
 
 			responseDto.setTotalRows(i);
 
+			logSql.setTransaccion(dataInstance.get("transaction"));
 			logSql.setUsuario(dataInstance.get("analyst"));
 			logSql.setDescripcionAudit(requestDTO.getStringSQL() + variBloc);
 			logSql.setProceso("Class ExecuteSql, Procedure executeSP");
@@ -777,6 +803,7 @@ public class ExecuteSql {
 		} catch (SQLException e) {
 			responseDto.setSqlBuffer(e.getLocalizedMessage());
 
+			logSql.setTransaccion(dataInstance.get("transaction"));
 			logSql.setUsuario(dataInstance.get("analyst"));
 			logSql.setDescripcionAudit(requestDTO.getStringSQL() + variBloc);
 			logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
@@ -791,6 +818,7 @@ public class ExecuteSql {
 			} catch (Exception ex) {
 				responseDto.setSqlBuffer(ex.getLocalizedMessage());
 
+				logSql.setTransaccion(dataInstance.get("transaction"));
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
@@ -808,6 +836,7 @@ public class ExecuteSql {
 			} catch (Exception ex) {
 				responseDto.setSqlBuffer(ex.getLocalizedMessage());
 
+				logSql.setTransaccion(dataInstance.get("transaction"));
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
@@ -823,6 +852,7 @@ public class ExecuteSql {
 			} catch (Exception ex) {
 				responseDto.setSqlBuffer(ex.getLocalizedMessage());
 
+				logSql.setTransaccion(dataInstance.get("transaction"));
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
@@ -846,7 +876,7 @@ public class ExecuteSql {
 		Store store = new Store();
 
 		try {
-			con = ConnectionDB.createConnection(dataInstance);
+			con = ConnectionDB.createConnection(dataInstance, null);
 			if (dataInstance.get("url").indexOf("sqlserver") < 0) {
 				IdentifyClientIdSession.identifyClientIdSession(con,
 						dataInstance);
@@ -888,6 +918,7 @@ public class ExecuteSql {
 				if (requestDTO.getBlockSQL().length > 0) {
 				responseDto
 							.setSqlBuffer("Instructions were executed correctly");
+				logSql.setTransaccion(dataInstance.get("transaction"));
 				logSql.setUsuario(dataInstance.get("analyst"));
 					logSql.setCamposTexto(new String[] {
 							dataInstance.get("url"), dataInstance.get("user"),
@@ -910,6 +941,7 @@ public class ExecuteSql {
 		} catch (SQLException ex) {
 			responseDto.setSqlBuffer(ex.getLocalizedMessage());
 
+			logSql.setTransaccion(dataInstance.get("transaction"));
 			logSql.setUsuario(dataInstance.get("analyst"));
 			logSql.setDescripcionAudit(requestDTO.getStringSQL());
 			logSql.setProceso("Class ExecuteSql, Procedure executeBlock");
@@ -924,6 +956,7 @@ public class ExecuteSql {
 			} catch (Exception e) {
 				responseDto.setSqlBuffer(e.getLocalizedMessage());
 
+				logSql.setTransaccion(dataInstance.get("transaction"));
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
@@ -936,6 +969,7 @@ public class ExecuteSql {
 		} catch (Exception e) {
 			responseDto.setSqlBuffer(e.getLocalizedMessage());
 
+			logSql.setTransaccion(dataInstance.get("transaction"));
 			logSql.setUsuario(dataInstance.get("analyst"));
 			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 					dataInstance.get("user"), responseDto.getSqlBuffer(),
@@ -952,6 +986,7 @@ public class ExecuteSql {
 			} catch (Exception ex) {
 				responseDto.setSqlBuffer(ex.getLocalizedMessage());
 
+				logSql.setTransaccion(dataInstance.get("transaction"));
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
@@ -967,6 +1002,7 @@ public class ExecuteSql {
 			} catch (Exception ex) {
 				responseDto.setSqlBuffer(ex.getLocalizedMessage());
 
+				logSql.setTransaccion(dataInstance.get("transaction"));
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),

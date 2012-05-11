@@ -1,7 +1,6 @@
 package com.pratech.accesscontroldb.persistence;
 
 import com.pratech.accesscontroldb.DTO.LogSql;
-import com.pratech.accesscontroldb.common.ACConfig;
 
 import suramericana.cronos.cliente.loggerAuditoria.AuditoriaCronos;
 import suramericana.cronos.cliente.logger.LoggerCronos;
@@ -44,13 +43,13 @@ public class Store {
 			}
 			if (logSql.getCamposTexto()[0].length() > 0) {
 				logger.info(logSql.getUsuario(), logSql.getCod(),
-						Long.parseLong(ACConfig.getValue("transaccion")),
+						logSql.getTransaccion(),
 						logSql.getDescripcionAudit(), logSql.getProceso(),
 						logSql.getCamposTexto());
 
 			} else {
 				logger.info(logSql.getUsuario(), logSql.getCod(),
-						Long.parseLong(ACConfig.getValue("transaccion")),
+						Long.parseLong("1"),
 						logSql.getDescripcionAudit(), logSql.getProceso());
 			}
 		}
@@ -65,13 +64,13 @@ public class Store {
 
 				if (logSql.getCamposTexto()[0].length() > 0) {
 					logger.info(logSql.getUsuario(), logSql.getCod(),
-							Long.parseLong(ACConfig.getValue("transaccion")),
+							logSql.getTransaccion(),
 							logSql.getDescripcionAudit(), logSql.getProceso(),
 							logSql.getCamposTexto());
 				} else {
 
 					logger.info(logSql.getUsuario(), logSql.getCod(),
-							Long.parseLong(ACConfig.getValue("transaccion")),
+							Long.parseLong("1"),
 							logSql.getDescripcionAudit(), logSql.getProceso());
 				}
 
@@ -90,7 +89,7 @@ public class Store {
 					app_name);
 			try {
 				loggerCronos.info(logSql.getUsuario(), logSql.getCod(),
-						Long.parseLong(ACConfig.getValue("transaccion")),
+						logSql.getTransaccion(),
 						logSql.getDescripcionAudit(), logSql.getProceso(),
 						logSql.getCamposTexto());
 

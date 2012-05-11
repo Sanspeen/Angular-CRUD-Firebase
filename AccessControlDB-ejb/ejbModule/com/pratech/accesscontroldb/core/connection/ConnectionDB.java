@@ -20,15 +20,19 @@ import java.util.Map;
  */
 public class ConnectionDB {
 
-	private final static Store store = null;
+	private final static Store store = new Store();
+
 
 	/**
 	 * Crea un objeto de conexion utlizado para las conexion a la base de datos
-	 * que contiene la lista de instancias
+	 * que contiene la lista de instancias.
 	 * 
+	 * @param dataInstance Datos de conexión.
+	 * @param errorDetail Si se recibe este argumento y ocurre 
+	 *        un error de conexión, se almacenará en él detalles del error.
 	 * @return
 	 */
-	public static Connection createConnection(Map<String, String> dataInstance) {
+	public static Connection createConnection(Map<String, String> dataInstance, StringBuffer errorDetail) {
 		Connection con = null;
 		LogSql logSql = new LogSql();
 		String JDBC;
@@ -57,17 +61,61 @@ public class ConnectionDB {
 			con = DriverManager.getConnection(JDBC, user, pass);
 
 		} catch (ClassNotFoundException e) {
+			//Se solicitó poner en la salida estándar
+			//los mensajes de error al crear conexión
+			e.printStackTrace(System.out);
+			
 			logSql.setUsuario("");
 			logSql.setDescripcionAudit(e.getLocalizedMessage());
 			logSql.setCod("AC4");
 			logSql.setThrowable(e.getCause());
 			store.save("4", logSql);
+			
+			//Obtener string detallado
+			if (errorDetail != null)
+				errorDetail.append(
+						"Error de conexi\u00f3n: [" +
+						"tipo=" + e.getClass().getName() + ", " +
+						"mensaje=" + e.getLocalizedMessage() + "]"
+				);
 		} catch (SQLException e) {
+			//Se solicitó poner en la salida estándar
+			//los mensajes de error al crear conexión
+			e.printStackTrace(System.out);
+			
 			logSql.setUsuario("");
 			logSql.setDescripcionAudit(e.getLocalizedMessage());
 			logSql.setCod("AC4");
 			logSql.setThrowable(e.getCause());
 			store.save("4", logSql);
+			
+			//Obtener string detallado
+			if (errorDetail != null)
+				errorDetail.append(
+						"Error de conexi\u00f3n: [" +
+						"tipo=" + e.getClass().getName() + ", " +
+						"mensaje=" + e.getLocalizedMessage() + ", " +
+						"ErrorCode=" + e.getErrorCode() + ", " +
+						"SQLState=" + e.getSQLState() + "]"
+				);
+		} catch (Exception e) {
+			//Se solicitó poner en la salida estándar
+			//los mensajes de error al crear conexión
+			e.printStackTrace(System.out);
+			
+			logSql.setUsuario("");
+			logSql.setDescripcionAudit(e.getLocalizedMessage());
+			logSql.setCod("AC4");
+			logSql.setThrowable(e.getCause());
+			store.save("4", logSql);
+			
+			//Obtener string detallado
+			if (errorDetail != null)
+				errorDetail.append(
+						"Error de conexi\u00f3n: [" +
+						"tipo=" + e.getClass().getName() + ", " +
+						"mensaje=" + e.getLocalizedMessage() + "]"
+				);
 		}
 		return con;
 	}

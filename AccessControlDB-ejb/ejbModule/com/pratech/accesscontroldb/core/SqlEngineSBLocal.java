@@ -107,4 +107,7 @@ public interface SqlEngineSBLocal {
 	public List<String[]> listComb();
 
 	public String getXMLType(String[] parameters, DataConnection dataConnection);
+	
+	public String updateInstancesXML();
+	
 }

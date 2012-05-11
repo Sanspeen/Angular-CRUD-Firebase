@@ -26,8 +26,56 @@ public class DataConnection implements Serializable {
 	private String password;
 	private String url;
 	private String ipUser;
+	private String team;
+	private String observations;
+	private String transaction;
 
 	public DataConnection() {
+	}
+
+	/**
+	 * @return the transaction
+	 */
+	public String getTransaction() {
+		return transaction;
+	}
+
+	/**
+	 * @param transaction
+	 *             the transaction to set
+	 */
+	public void setTransaction(String transaction) {
+		this.transaction = transaction;
+	}
+	
+	/**
+	 * @return the team
+	 */
+	public String getTeam() {
+		return team;
+	}
+
+	/**
+	 * @param team
+	 *             the team to set
+	 */
+	public void setTeam(String team) {
+		this.team = team;
+	}
+
+	/**
+	 * @return the observations
+	 */
+	public String getObservations() {
+		return observations;
+	}
+
+	/**
+	 * @param observations 
+	 *             the observations to set
+	 */
+	public void setObservations(String observations) {
+		this.observations = observations;
 	}
 
 	/**

@@ -41,6 +41,7 @@ public class JdbcUtil {
 			stmt.execute();
 		} catch (Exception e) {
 			LogSql logSql = new LogSql();
+			logSql.setTransaccion(dataInstance.get("transaction"));
 			logSql.setUsuario(dataInstance.get("analyst"));
 			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 					dataInstance.get("user"), dataInstance.get("scope") });
@@ -83,6 +84,7 @@ public class JdbcUtil {
 			String result = "Problem occurred during dump of dbms_output! "
 					+ e.toString();
 			LogSql logSql = new LogSql();
+			logSql.setTransaccion(dataInstance.get("transaction"));
 			logSql.setUsuario(dataInstance.get("analyst"));
 			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 					dataInstance.get("user"), dataInstance.get("scope") });
@@ -104,7 +106,7 @@ public class JdbcUtil {
 		try {
 			String nameTable = SqlInstruction.getTableFromSql(StringSQL);
 
-			con = ConnectionDB.createConnection(dataInstance);
+			con = ConnectionDB.createConnection(dataInstance, null);
 			DatabaseMetaData meta = con.getMetaData();
 			rs = meta.getPrimaryKeys(null, null, nameTable);
 			String keys = "";

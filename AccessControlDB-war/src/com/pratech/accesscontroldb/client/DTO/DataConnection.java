@@ -27,9 +27,36 @@ public class DataConnection implements Serializable {
     private String userName;
     private String url;
     private String ipUser;
+    private String team;
+    private String observations;
+    private String transaction;
 
     public DataConnection() {
     }
+    
+    public String getTransaction() {
+		return transaction;
+	}
+
+	public void setTransaction(String transaction) {
+		this.transaction = transaction;
+	}
+    
+    public String getObservations() {
+		return observations;
+	}
+
+	public void setObservations(String observations) {
+		this.observations = observations;
+	}
+
+	public String getTeam() {
+		return team;
+	}
+
+	public void setTeam(String team) {
+		this.team = team;
+	}
 
     public String getScope() {
         return scope;

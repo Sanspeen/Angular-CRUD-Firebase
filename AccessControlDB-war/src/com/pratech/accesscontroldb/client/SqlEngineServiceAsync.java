@@ -18,8 +18,6 @@ public interface SqlEngineServiceAsync {
 
 	public void listAmbi(AsyncCallback<List<String>> asyncCallback);
 
-	void updateInstancesXMLFile(AsyncCallback<String> callback);
-	
 	void validateInstancesXMLFile(AsyncCallback<String> callback);
 	
 	void connectionEntry(DataConnection dataConnection,

@@ -4,7 +4,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,6 +26,7 @@ import org.xml.sax.SAXException;
 
 import com.pratech.accesscontroldb.common.ACConfig;
 import com.pratech.accesscontroldb.common.ACConstant;
+import com.pratech.accesscontroldb.core.connection.ConnectionDB;
 
 public class XMLData {
 
@@ -48,6 +54,16 @@ public class XMLData {
 
 
 			document = builder.parse(new File(ACConstant.PATH_NUFUENTE));
+			nodeList = document.getElementsByTagName("data");
+			data = new String[nodeList.getLength()];
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				Element ele = (Element)nodeList.item(i);
+				NodeList node = ele.getChildNodes();
+				data[i] = ((Node) node.item(0)).getNodeValue().toString();
+			}			
+			lisCombo.add(data);
+
+			document = builder.parse(new File(ACConstant.PATH_EQUIPO));
 			nodeList = document.getElementsByTagName("data");
 			data = new String[nodeList.getLength()];
 			for (int i = 0; i < nodeList.getLength(); i++) {
@@ -272,6 +288,107 @@ public class XMLData {
 					ex);
 		}
 		return null;
+	}
+	
+	/**
+	 * Exporta las instancias como XML de la tabla que las contiene.
+	 * 
+	 * @param ambiente
+	 * @return List
+	 */
+	public String updateInstancesXML() {
+		Connection con = null;
+		PreparedStatement statement = null;
+		ResultSet rs = null;
+		String[] ambientes;
+		int cdAmbiente;
+		StringBuffer xmlInstancias = new StringBuffer();
+		String xmlAmbientes;
+		String message;
+		String fileValidationMessage;
+		FileWriter writer;
+		File originalFile;
+		File backupOriginalFile;
+		File newFile;
+		XMLData xmlData;
+
+		try {
+			ambientes = ACConfig.getValue("SincAmbientes").split(",");
+			con = ConnectionDB.createConnection(new HashMap<String, String>(), null);
+			String StrSQLXML = ACConfig.getValue("SQLXMLIntanciasPorAmbiente");
+			statement = con.prepareStatement(StrSQLXML);
+			
+			for (String ambiente : ambientes)
+			{
+				cdAmbiente = Integer.parseInt(ambiente.trim());
+				statement.setInt(1, cdAmbiente);
+				statement.setInt(2, cdAmbiente);
+				boolean moreResults = statement.execute();
+				if (moreResults)
+				{
+					rs = statement.getResultSet();
+					rs.next();
+					xmlInstancias.append(rs.getString(1));
+					try {
+						rs.close();
+					} catch (Exception ex) {
+					}
+					rs = null;
+				}
+				statement.clearParameters();
+			}
+			xmlAmbientes = "<environments>" + xmlInstancias.toString() + "</environments>";
+			
+			newFile = new File(ACConstant.PATH_INSTANCES + ".new");
+			backupOriginalFile = new File(ACConstant.PATH_INSTANCES + ".backup");
+			writer = new FileWriter(newFile);
+			writer.write(xmlAmbientes);
+			writer.flush();
+			writer.close();
+			
+			xmlData = new XMLData();
+			fileValidationMessage = xmlData.validateXMLInstances(ACConstant.PATH_INSTANCES + ".new");
+			if (fileValidationMessage != null) {
+				message = "Fallo actualizando archivo de instancias: se encontraron errores en la validación del nuevo archivo generado. Mensaje de validación: '" + fileValidationMessage
+				 + "'. Por ello dicho archivo no reemplazará el archivo actual de instancias, que se conservará.";
+			} else {
+				originalFile = new File(ACConstant.PATH_INSTANCES);
+				backupOriginalFile.delete();
+				if (originalFile.renameTo(backupOriginalFile)) {
+					if (newFile.renameTo(originalFile)) {
+						message = "Éxito actualizando archivo de instancias.";
+					} else {
+						message = "Fallo actualizando archivo de instancias: " + "no se pudo reemplazar el archivo de instancias original.";
+					}
+				} else {
+					message = "Fallo actualizando archivo de instancias: " + "no se pudo respaldar el archivo de instancias original.";
+				}
+			}
+		} catch (SQLException ex) {
+			Logger.getLogger("Error_Instancias").log(Level.SEVERE, null, ex);
+			message = "Fallo actualizando archivo de instancias: " + ex.getMessage();
+		} catch (Exception ex) {
+			Logger.getLogger("Error_Instancias").log(Level.SEVERE, null, ex);
+			message = "Fallo actualizando archivo de instancias: " + ex.getMessage();
+		} finally {
+			try {
+				rs.close();
+			} catch (Exception ex) {
+			}
+			rs = null;
+			try {
+				statement.close();
+			} catch (Exception ex) {
+			}
+			statement = null;
+			try {
+				con.close();
+			} catch (Exception ex) {
+			}
+			con = null;
+		}
+		
+		return message;
 	}
 	
 }

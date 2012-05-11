@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <web-app>
+	<distributable />
 	<servlet>
 		<servlet-name>SqlEngineService</servlet-name>
 		<servlet-class>com.pratech.accesscontroldb.server.SqlEngineServiceImpl
@@ -12,9 +13,19 @@
 		<url-pattern>/accesscontroldb_war/sqlengineservice</url-pattern>
 	</servlet-mapping>
   <servlet>
+		<servlet-name>AdminService</servlet-name>
+		<servlet-class>com.pratech.accesscontroldb.server.AdminServiceImpl
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AdminService</servlet-name>
+		<url-pattern>/accesscontroldb_war/adminservice</url-pattern>
+	</servlet-mapping>
+	<servlet>
     <display-name>ExcelSender</display-name>
     <servlet-name>ExcelSender</servlet-name>
-    <servlet-class>com.pratech.accesscontroldb.server.ExcelSender</servlet-class>
+		<servlet-class>com.pratech.accesscontroldb.server.ExcelSender
+		</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>ExcelSender</servlet-name>
@@ -52,5 +63,22 @@
 	<session-config>
 		<session-timeout>60</session-timeout>
 	</session-config>
+
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>administrative</web-resource-name>
+			<url-pattern>/accesscontroldb_war/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>AUTH_USER</role-name>
+		</auth-constraint>
+	</security-constraint>
+	<login-config>
+		<auth-method>BASIC</auth-method>
+		<realm-name>default</realm-name>
+	</login-config>
+	<security-role>
+		<role-name>AUTH_USER</role-name>
+	</security-role>
 
 </web-app>

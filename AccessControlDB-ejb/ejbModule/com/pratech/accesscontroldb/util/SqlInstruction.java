@@ -30,7 +30,13 @@ public class SqlInstruction {
 	private Map<String, String> mapString = new HashMap<String, String>();
 
 	/**
-	 * Convierte la consulta SQL
+	 * Determina el tipo de sentencia SQL, si es:
+	 * - sqlType 0: Sentencia sql de una sola instrucción
+	 * - sqlType 1: Bloque anónimo
+	 * - sqlType 2: Bloque de consultas
+	 * Conserva lo que está dentro de comillas simples por medio de un
+	 * reemplazo de dichos valores con un placeholder PR@XI@S + consecutivo
+	 * y luego deshace éste reemplazo para que quede en su estado original.
 	 * 
 	 * @param requestDTO
 	 *            = DTO with data from the view
@@ -39,32 +45,35 @@ public class SqlInstruction {
 	public RequestDTO editSql(RequestDTO requestDTO,
 			Map<String, String> dataInstance) {
 
+		//Reemplaza valores entre comillas simples por PR@XI@S + consecutivo
 		String stringSQL = getTextString(requestDTO.getStringSQL());
 
+		//Si jj < 0, no es un bloque anonimo
 		int jj = stringSQL.toUpperCase().indexOf("BEGIN");
 		if (jj < 0) {
+			//En caso que no sea un bloque anonimo, 
+			//se determina si se trata de un bloque de consulas
+			//o de una sentencia sql con una sola instruccion
 
 			String[] vecBloc = null;
 			// Identifica si modifico la cosulta para quitarle el ultimo ;
 			boolean mod = false;
-			if (stringSQL.trim().indexOf(";") >= 0) {
 
+			if (stringSQL.trim().indexOf(";") >= 0) {
+				//Si existe al menos un punto y coma, éste debe estar
+				//seguido por un salto de línea o espacio en blanco
+				//o tabulador para considerarse que después
+				//de él inicia una nueva instrucción.
 				String tem = stringSQL.trim();
 				vecBloc = tem.split(";[\n\r\t\\s]");
 
 				for (int i = 0; i < vecBloc.length; i++) {
-					if (vecBloc[i].startsWith("\r")) {
-						vecBloc[i] = vecBloc[i].substring(0,
-								vecBloc[i].length());
-						if (vecBloc[i].startsWith("\n")) {
-							vecBloc[i] = vecBloc[i].substring(0,
-									vecBloc[i].length());
-						}
-					} else if (vecBloc[i].startsWith("\n")) {
-						vecBloc[i] = vecBloc[i].substring(0,
-								vecBloc[i].length());
-					}
 					if (vecBloc[i].endsWith(commandTerminator)) {
+						//Si termina con ";", se quita el ";"
+						//pues oracle no lo recibe. Ésto se hace
+						//en general para la última línea pues en ella
+						//el punto y coma no va seguido de un espacio, tabulador
+						//o salto de linea.
 						mod = true;
 						vecBloc[i] = vecBloc[i].substring(
 								0,
@@ -75,28 +84,39 @@ public class SqlInstruction {
 			}
 			if (vecBloc != null) {
 				if (vecBloc.length > 1) {
+					//Marca el comando como un bloque de consultas
 					requestDTO.setTypeSql(2);
 					requestDTO.setBlockSQL(vecBloc);
 				} else {
+					//Marca el comando como una sola consulta
 					if (mod) {
+						//Reemplaza las variables en una sola consulta
 						stringSQL = setTextString(vecBloc[0]);
 					}
 					requestDTO.setTypeSql(0);
 				}
+				//Reemplaza las variables en el bloque de consultas
 				requestDTO.setBlockSQL(setTextStringBlock(vecBloc));
 			} else {
 				requestDTO.setTypeSql(0);
 			}
 		} else {
+			//En caso que sea un bloque anónimo, lo marca como tal
 			requestDTO.setTypeSql(1);
 		}
 
 		if (requestDTO.isSQLServer()
 				&& stringSQL.toUpperCase().indexOf("ROWID") > 0) {
+			//Agrega los campos de la llave primaria a la consulta las
+			//consultas en SQL server, pues éste no maneja ROWID
 			requestDTO = insertRowid(dataInstance, stringSQL, requestDTO);
 		}
 		if (requestDTO.getBlockSQL() == null
 				|| requestDTO.getBlockSQL().length < 1) {
+			//Reemplaza las variables en una sola consulta
+			//en el caso que no lleva ;
+			//Nota: la segunda condición puede ser innecesaria
+			//requestDTO.getBlockSQL().length < 1
 		requestDTO.setStringSQL(setTextString(stringSQL));
 		} else {
 			requestDTO.setStringSQL(stringSQL);

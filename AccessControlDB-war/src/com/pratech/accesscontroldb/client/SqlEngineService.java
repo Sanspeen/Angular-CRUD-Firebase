@@ -49,13 +49,6 @@ public interface SqlEngineService extends RemoteService {
 	public List<String> listInst(String dat);
 	
 	/**
-	 * Update XML instances file
-	 * 
-	 * @return
-	 */
-	public String updateInstancesXMLFile();
-	
-	/**
 	 * Validate XML instances file
 	 * 
 	 * @return

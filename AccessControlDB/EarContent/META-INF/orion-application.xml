@@ -24,9 +24,37 @@
 		<import-shared-library name="Inversura.XML" />
 		<import-shared-library name="cxf.foundation" />
 		<import-shared-library name="InversuraSWB" />
+		<import-shared-library name="ehcache" />
 		<!-- Se remueve version anterior POI 3.2 
 		     en libreria compartida: Inversura.Utilidades -->
 		<!-- import-shared-library name="Inversura.Utilidades" /  -->
 	</imported-shared-libraries>
 
+	<jazn provider="XML" jaas-mode="doAsPrivileged">
+		<property name="custom.loginmodule.provider" value="true" />
+		<property name="role.mapping.dynamic" value="true" />
+		<jazn-web-app auth-method="CUSTOM_AUTH" />
+	</jazn>
+	<jazn-loginconfig>
+		<application>
+			<name>AccessControlDB</name>
+			<login-modules>
+				<login-module>
+					<class>inversura.idm.login.SeusLoginModule</class>
+					<control-flag>required</control-flag>
+					<options>
+						<option>
+							<name>debug</name>
+							<value>true</value>
+						</option>
+						<option>
+							<name>CodServicio</name>
+							<value>ControlAccesoBd</value>
+						</option>
+					</options>
+				</login-module>
+			</login-modules>
+		</application>		
+	</jazn-loginconfig>
+	
 </orion-application>

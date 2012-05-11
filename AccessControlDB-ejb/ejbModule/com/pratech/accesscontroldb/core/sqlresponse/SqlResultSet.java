@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.pratech.accesscontroldb.DTO.RequestDTO;
-
 import oracle.sql.ROWID;
+
+import com.pratech.accesscontroldb.DTO.RequestDTO;
 
 /**
  * Procesa el ResulSet
@@ -26,6 +26,8 @@ import oracle.sql.ROWID;
  */
 public class SqlResultSet {
 
+	static final String HEXES = "0123456789ABCDEF";
+	
 	/**
 	 * Recorre un ResultSet y lo pasa a una lista de String[], además se encarga
 	 * de la paginación.
@@ -39,15 +41,27 @@ public class SqlResultSet {
 		
 		List<String[]> dataLi = new ArrayList<String[]>();
 
-			boolean more;
+		boolean more = false;
 		String[] rowTypes;
 		String[] rowTitles;
 		String[] row;
 		
+			try {
 			if (requestDTO.getExportData() == 2) {
 				more = rs.absolute(1);
 			} else {
 				more = rs.absolute(requestDTO.getStart());
+			}
+			} catch (SQLException e) {
+				//Esta excepción ocurre cuando se trae un tipo LONG o LONG RAW
+				//En estos casos, el driver abre un stream cuando se hace executeQuery o next (o absolute)
+				//En este punto el stream esta cerrado y saca una excepción, pero como no interesa leer el
+				//campo en este flujo podemos ingnorar la excepción e intentar mover el cursor nuevamente
+				if (requestDTO.getExportData() == 2) {
+					more = rs.absolute(1);
+				} else {
+					more = rs.absolute(requestDTO.getStart());
+				}
 			}
 			if (more) {
 				ResultSetMetaData rsmd = rs.getMetaData();
@@ -129,7 +143,7 @@ public class SqlResultSet {
 					for (int i = 1; i <= colCount; i++) {
 						Object value = rs.getObject(i);
 						if (value != null) {
-							String name = value.getClass().getName();
+							String name = value.getClass().getCanonicalName();
 							if (name.equals("oracle.sql.ROWID")) {
 								ROWID rowid = (ROWID) value;
 								row[i] = rowid.stringValue();
@@ -161,6 +175,8 @@ public class SqlResultSet {
 								Date date = rs.getTimestamp(i);
 								// Date date = rs.getDate(i + 1);
 								row[i] = date.toString();
+							} else if (name.equals("byte[]")) {
+								row[i] = getHex((byte[]) value);
 							} else {
 								row[i] = value.toString();
 							}
@@ -170,4 +186,16 @@ public class SqlResultSet {
 					}
 		return row;
 	}
+	
+	public static String getHex( byte [] raw ) {
+	    if ( raw == null ) {
+	      return null;
+	    }
+	    final StringBuilder hex = new StringBuilder( 2 * raw.length );
+	    for ( final byte b : raw ) {
+	      hex.append(HEXES.charAt((b & 0xF0) >> 4))
+	         .append(HEXES.charAt((b & 0x0F)));
+	    }
+	    return hex.toString();
+	  }
 }

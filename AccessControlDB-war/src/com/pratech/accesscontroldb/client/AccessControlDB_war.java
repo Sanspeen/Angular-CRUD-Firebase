@@ -11,6 +11,7 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -49,6 +50,8 @@ import com.pratech.accesscontroldb.client.DTO.RecordsTable;
 import com.pratech.accesscontroldb.client.DTO.RequestDTO;
 import com.pratech.accesscontroldb.client.DTO.ResponseDTO;
 import com.pratech.accesscontroldb.client.view_elements.FastCellTable;
+
+import com.pratech.accesscontroldb.client.view_elements.PopupMenu;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -181,7 +184,9 @@ public class AccessControlDB_war implements EntryPoint {
 	private ListBox lisSource = new ListBox();
 	private TextBox txtSourceNumber = new TextBox();
 	private ListBox lisSolution = new ListBox();
+	private ListBox lisTeam = new ListBox();
 	private TextBox txtApplicacion = new TextBox();
+	private TextBox txtObservations = new TextBox();
 	private TextBox txtUser = new TextBox();
 	private InlineLabel txtScope1 = new InlineLabel();
 	private InlineLabel txtInstance1 = new InlineLabel();
@@ -322,15 +327,19 @@ public class AccessControlDB_war implements EntryPoint {
 								if (responseDTO.getNameFileExport() != null) {
 									if (responseDTO.getNameFileExport()
 											.length() > 0) {
+											if (responseDTO.getNameFileExport()
+												.equals("<error>")) {
+												Window.alert("Ocurri\u00f3 un error durante la generaci\u00f3n del archivo Excel. " +
+														"Por favor intente generarlo nuevamente.");
+											} else {
 										Window.open(GWT.getHostPageBaseURL()
 													+ "/ExcelSender?filename="
 												+ responseDTO
 														.getNameFileExport()
 														.trim(), "Export", "");
 									}
-					
 								}
-					
+									}
 							}
 						}
 
@@ -353,7 +362,7 @@ public class AccessControlDB_war implements EntryPoint {
 		VerticalPanel verticalPanel = new VerticalPanel();
 		dialogo.setWidget(verticalPanel);
 
-		Grid grid = new Grid(12, 2);
+		Grid grid = new Grid(14, 2);
 		verticalPanel.add(grid);
 
 		Label lblScope = new Label("Ambiente *");
@@ -368,44 +377,58 @@ public class AccessControlDB_war implements EntryPoint {
 		lisInstance.setSelectedIndex(0);
 		grid.setWidget(1, 1, lisInstance);
 
-		Label lblSource = new Label("Causa del Ingreso a producci\u00F3n *");
-		grid.setWidget(2, 0, lblSource);
+		Label lblEquipo = new Label("Equipo *");
+		grid.setWidget(2, 0, lblEquipo);
 
-		grid.setWidget(2, 1, lisSource);
+		lisTeam.setSelectedIndex(0);
+		grid.setWidget(2, 1, lisTeam);
+
+		Label lblSource = new Label("Causa del Ingreso a producci\u00F3n *");
+		grid.setWidget(3, 0, lblSource);
+
+		grid.setWidget(3, 1, lisSource);
 
 		Label lblSourceNumber = new Label("Nro. de ticket, requerimiento o explicaci\u00F3n *");
-		grid.setWidget(3, 0, lblSourceNumber);
+		grid.setWidget(4, 0, lblSourceNumber);
 
 		txtSourceNumber.setText("");
-		grid.setWidget(3, 1, txtSourceNumber);
+		grid.setWidget(4, 1, txtSourceNumber);
 
 		Label lblSolution = new Label("Soluci\u00F3n *");
-		grid.setWidget(4, 0, lblSolution);
+		grid.setWidget(5, 0, lblSolution);
 
-		grid.setWidget(4, 1, lisSolution);
+		grid.setWidget(5, 1, lisSolution);
 
 		Label lblApplication = new Label(
 				"Aplicaci\u00F3n responsable de la soluci\u00F3n *");
-		grid.setWidget(5, 0, lblApplication);
+		grid.setWidget(6, 0, lblApplication);
 
 		txtApplicacion.setText("");
-		grid.setWidget(5, 1, txtApplicacion);
+		grid.setWidget(6, 1, txtApplicacion);
+
+		Label lblObservations = new Label(
+				"Observaciones");
+		grid.setWidget(7, 0, lblObservations);
+		
+		txtObservations.setText("");
+		txtObservations.setMaxLength(255);
+		grid.setWidget(7, 1, txtObservations);
 
 		Label lblUser = new Label("Usuario *");
-		grid.setWidget(7, 0, lblUser);
+		grid.setWidget(9, 0, lblUser);
 
 		txtUser.setText("");
-		grid.setWidget(7, 1, txtUser);
+		grid.setWidget(9, 1, txtUser);
 
 		Label lblPassword = new Label("Contrase\u00F1a *");
-		grid.setWidget(8, 0, lblPassword);
+		grid.setWidget(10, 0, lblPassword);
 
 		txtPassword.setText("");
-		grid.setWidget(8, 1, txtPassword);
+		grid.setWidget(10, 1, txtPassword);
 
 		Grid gridButt = new Grid(1, 2);
 
-		grid.setWidget(9, 1, gridButt);
+		grid.setWidget(11, 1, gridButt);
 
 		Button btnIn = new Button("Ingresar");
 		gridButt.setWidget(0, 0, btnIn);
@@ -431,12 +454,15 @@ public class AccessControlDB_war implements EntryPoint {
 					dataConnection.setInstance(lisInstance.getValue(lisInstance
 							.getSelectedIndex()));
 				}
+				dataConnection.setTeam(lisTeam.getValue(lisTeam
+						.getSelectedIndex()));
 				dataConnection.setSource(lisSource.getValue(lisSource
 						.getSelectedIndex()));
 				dataConnection.setSourceNumber(txtSourceNumber.getValue());
 				dataConnection.setSoluction(lisSolution.getValue(lisSolution
 						.getSelectedIndex()));
 				dataConnection.setApplication(txtApplicacion.getValue());
+				dataConnection.setObservations(txtObservations.getValue());
 				dataConnection.setUser(txtUser.getValue());
 				dataConnection.setPassword(txtPassword.getValue());
 
@@ -449,11 +475,17 @@ public class AccessControlDB_war implements EntryPoint {
 							new AsyncCallback<String[]>() {
 
 								public void onFailure(Throwable caught) {
-									Window.alert("*Error de usuario o Contrase\u00F1a");
+									Window.alert("Error al establecer conexi\u00f3n.");
 								}
 
 								public void onSuccess(String[] data) {
 									if (data[0].length() > 0) {
+										//En la posición 4 de data viene el texto del error
+										//de conexión cuando un error ocurrió.
+										if (data.length >= 5 && data[4] != null && data[4].trim().length() > 0) {
+											Window.alert(data[4]);
+										} else {
+											//No hay un mensaje de error
 										dataConnection.setUrl(data[0]);
 										intRowsPerPage = Integer
 												.parseInt(data[1]);
@@ -462,9 +494,11 @@ public class AccessControlDB_war implements EntryPoint {
 										} else {
 											requestDTO.setSQLServer(false);
 										}
+											dataConnection.setTransaction(data[3]);
 										dialogo.hide();
+										}
 									} else {
-										Window.alert("Error de conexion");
+										Window.alert("Error de conexi\u00f3n");
 									}
 								}
 							});
@@ -494,7 +528,7 @@ public class AccessControlDB_war implements EntryPoint {
 	 * Fill the combo environment
 	 * 
 	 */
-	private void fillLisAmbi() {
+	public void fillLisAmbi() {
 		sqlEng.listAmbi(new AsyncCallback<List<String>>() {
 
 			public void onFailure(Throwable caught) {
@@ -517,7 +551,7 @@ public class AccessControlDB_war implements EntryPoint {
 	 * 
 	 * @param data
 	 */
-	private void fillLisInst(String data) {
+	public void fillLisInst(String data) {
 		sqlEng.listInst(data, new AsyncCallback<List<String>>() {
 
 			public void onFailure(Throwable caught) {
@@ -557,6 +591,13 @@ public class AccessControlDB_war implements EntryPoint {
 				lisSource.addItem("");
 				for (int i = 0; i < result.get(0).length; i++) {
 					lisSource.addItem(result.get(0)[i]);
+				}
+				
+				lisTeam.clear();
+				lisTeam.setSelectedIndex(0);
+				lisTeam.addItem("");
+				for (int i = 0; i < result.get(2).length; i++) {
+					lisTeam.addItem(result.get(2)[i]);
 				}
 			}
 
@@ -1113,6 +1154,8 @@ public class AccessControlDB_war implements EntryPoint {
 				;
 			}
 		});
+		
+		RootPanel.get().addDomHandler(new PopupMenu(this), ContextMenuEvent.getType());
 	}
 
 	/**
@@ -1225,6 +1268,19 @@ public class AccessControlDB_war implements EntryPoint {
 		} else {
 			txtUser.setStyleName("textOk");
 		}
+		
+		if (dataConnection.getTeam() == null) {
+			lisTeam.setStyleName("textFillLis");
+			valid = false;
+		} else {
+			if (dataConnection.getTeam().trim().length() < 1) {
+				lisTeam.setStyleName("textFillLis");
+				valid = false;
+			} else {
+				lisTeam.setStyleName("textOkLis");
+			}
+		}
+		
 		if (!valid) {
 			Window.alert("Ingrese todos los datos del formulario");
 		}
@@ -1792,8 +1848,11 @@ public class AccessControlDB_war implements EntryPoint {
 						.get(i).id];
 				String column = responseDTO.getListData().get(1)[pendingChanges
 						.get(i).id];
+				//Se envia requestDTO.getStringSQL() 
+				//la cual es la consulta SQL que dió origen a la tabla
+				//editada.
 				modifiedRecords.add(new String[] { val, reco.reg[position],
-						type, column, textAreaSQL.getText() });
+						type, column, requestDTO.getStringSQL() });
 			}
 			sqlEng.updateRecords(modifiedRecords, dataConnection,
 					requestDTO.getStringSQL(),
@@ -1911,6 +1970,8 @@ public class AccessControlDB_war implements EntryPoint {
 					Window.alert("No hay instrucciones a ejecutar");
 				}
 				modalTable.hide();
+				//Retorna requestDTO a estado original
+				requestDTO.setBlockSQL(null);
 			}
 		});
 
@@ -1918,6 +1979,8 @@ public class AccessControlDB_war implements EntryPoint {
 
 			public void onClick(ClickEvent arg0) {
 				modalTable.hide();
+				//Retorna requestDTO a estado original
+				requestDTO.setBlockSQL(null);
 			}
 		});
 

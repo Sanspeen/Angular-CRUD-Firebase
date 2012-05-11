@@ -9,12 +9,10 @@ import com.pratech.accesscontroldb.client.DTO.RequestDTO;
 import com.pratech.accesscontroldb.client.DTO.ResponseDTO;
 import com.pratech.accesscontroldb.common.Configuration;
 import com.pratech.accesscontroldb.core.SqlEngineSB;
-import com.pratech.accesscontroldb.persistence.XMLData;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class SqlEngineServiceImpl extends RemoteServiceServlet implements
 		SqlEngineService {
 
@@ -88,11 +86,6 @@ public class SqlEngineServiceImpl extends RemoteServiceServlet implements
 		return lisInst;
 	}
 
-	public String updateInstancesXMLFile() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
 	public String validateInstancesXMLFile() {
 		String validation;
 		SqlEngineSB sqlEngineSB = new SqlEngineSB();
@@ -214,6 +207,9 @@ public class SqlEngineServiceImpl extends RemoteServiceServlet implements
 		dConneRemote.setUser(dataConnection.getUser());
 		dConneRemote.setUrl(dataConnection.getUrl());
 		dConneRemote.setIpUser(getThreadLocalRequest().getRemoteAddr());
+		dConneRemote.setTeam(dataConnection.getTeam());
+		dConneRemote.setObservations(dataConnection.getObservations());
+		dConneRemote.setTransaction(dataConnection.getTransaction());
 		return dConneRemote;
 	}
 

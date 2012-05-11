@@ -5,8 +5,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.ss.usermodel.Cell;
@@ -29,8 +27,10 @@ public class Write {
 	 * @param requestDTO
 	 * @return
 	 * @throws SQLException
+	 * @throws Exception
 	 */
-	public String writeExcel(ResultSet rs, RequestDTO requestDTO) throws SQLException {
+	public String writeExcel(ResultSet rs, RequestDTO requestDTO)
+			throws SQLException, Exception {
 
 		//Nombre archivo Excel
 		String fileName = "";
@@ -43,7 +43,6 @@ public class Write {
 		RichTextString texto;
 		int rowIndex = 1;
 		
-		try {
 			boolean more;
 			String[] rowTitles;
 			String[] rowData;
@@ -87,33 +86,24 @@ public class Write {
 					}
 					more = rs.next();
 					
-					if (rowIndex == 65000)
-					{
+				if (rowIndex == 65000) {
 						break;
 					}
 					rowIndex++;
 				}
 			}
 
-		} catch (SQLException ex) {
-			Logger.getLogger(SqlResultSet.class.getName()).log(Level.SEVERE,
-					null, ex);
-		}
-		
 		// Se salva el libro.
-		try {
 			Date time = new Date();
-			fileName = "ACDB"  + time.getTime() + ".xlsx";
-			String filePath = "..//"
-				+ ACConfig.getValue("appConta")
+		long millis = time.getTime();
+
+		fileName = "ACDB" + millis + ".xlsx";
+
+		String filePath = "..//" + ACConfig.getValue("appConta")
 				+ "//applications//AccessControlDB//AccessControlDB-war//"
 				+ fileName.trim();
 			FileOutputStream theFile = new FileOutputStream(filePath);   			
 			libro.write(theFile);
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-		}
 
 		return fileName;
 	}
