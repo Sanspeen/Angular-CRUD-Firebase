@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import com.pratech.accesscontroldb.persistence.Store;
+
 /**
  * Clase para el manejo de configuraciones del programa
  * 
@@ -29,11 +31,12 @@ public class Configuration {
         	InputStream is = null;
         	File fileConfig = new File(ACConstant.PATH_CONFIG);
     		is = new FileInputStream(fileConfig.getPath());
-    		
     		properties.load(is);
-    		
         } catch (IOException ex) {
             ex.printStackTrace();
+            Store.getInstance().error("NA", 
+            		"Error al cargar las propiedades del aplicativo", 
+            		ex);
         }
     }
     

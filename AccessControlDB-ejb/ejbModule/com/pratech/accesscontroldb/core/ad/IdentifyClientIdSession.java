@@ -4,6 +4,8 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.util.Map;
 
+import com.pratech.accesscontroldb.persistence.Store;
+
 public class IdentifyClientIdSession {
 
 	/**
@@ -21,15 +23,18 @@ public class IdentifyClientIdSession {
 					+ ":AccessControlDB:" + dataInstance.get("ip").trim());
 			cstmt.execute();
 		} catch (Exception e) {
-			System.out.println("Error conec " + e.getLocalizedMessage());
+			//Registrar excepción
 			e.printStackTrace();
+			Store.getInstance().error(dataInstance.get("user"), "Error general al identificar sesion", e);
 		} finally {
 			try {
 				if (cstmt != null) {
 					cstmt.close();
 				}
 			} catch (Exception e) {
+				//Registrar excepción
 				e.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error general al cerrar sentencia", e);
 			}
 			cstmt = null;
 		}

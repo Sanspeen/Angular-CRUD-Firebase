@@ -4,6 +4,8 @@ import com.pratech.accesscontroldb.DTO.BlocksVariable;
 import com.pratech.accesscontroldb.DTO.DataConnection;
 import com.pratech.accesscontroldb.DTO.RequestDTO;
 import com.pratech.accesscontroldb.DTO.ResponseDTO;
+import com.pratech.accesscontroldb.client.ACDBException;
+
 import java.util.List;
 
 import javax.ejb.Local;
@@ -32,9 +34,10 @@ public interface SqlEngineSBLocal {
 	 *            = lista con las variables utilizadas en los bloques anonimos
 	 * 
 	 * @return = DTO con la informacion a retornar.
+	 * @throws ACDBException 
 	 */
 	public ResponseDTO doSql(RequestDTO requestDto,
-			List<BlocksVariable> lisBlo, DataConnection dataConnection);
+			List<BlocksVariable> lisBlo, DataConnection dataConnection) throws ACDBException;
 
 	/**
 	 * Lista la informacion de los ambientes
@@ -62,11 +65,12 @@ public interface SqlEngineSBLocal {
 	 *            = datos requeridos para realziar la conexion
 	 * 
 	 * @return
+	 * @throws ACDBException 
 	 * 
 	 * @see com.pratech.accesscontroldb.core.SqlEngineSBLocal#connectionEntry(com
 	 *      .pratech.accesscontroldb.DTO.DataConnection)
 	 */
-	public String[] connectionEntry(DataConnection dataConnection);
+	public String[] connectionEntry(DataConnection dataConnection) throws ACDBException;
 
 	/**
 	 * Actualiza los registros modificados en la tabla de resultados
@@ -79,12 +83,13 @@ public interface SqlEngineSBLocal {
 	 *            = Instruccion SQL ingresada.
 	 * 
 	 * @return DTO con la informacion a retornar.
+	 * @throws ACDBException 
 	 * 
 	 * @see com.pratech.accesscontroldb.core.SqlEngineSBLocal#updateRecords(java.util.List,
 	 *      com.pratech.accesscontroldb.DTO.DataConnection, java.lang.String)
 	 */
 	public ResponseDTO updateRecords(List<String[]> listUpdate,
-			DataConnection dataConnection, String SQLSelect);
+			DataConnection dataConnection, String SQLSelect) throws ACDBException;
 
 	/**
 	 * Retorna la informacion de los tipos de datos CLOB
@@ -93,8 +98,9 @@ public interface SqlEngineSBLocal {
 	 *            = vector con los datos para obtener el datos CLOB. Vector
 	 *            positions 0 - Nombre del campo 1 - Numero de registro 2 -
 	 *            Instruccion SQL
+	 * @throws ACDBException 
 	 */
-	public String getCLOB(String[] parameters, DataConnection dataConnection);
+	public String getCLOB(String[] parameters, DataConnection dataConnection) throws ACDBException;
 
 	/**
 	 * Elimina archivo de excel temporal
@@ -106,7 +112,7 @@ public interface SqlEngineSBLocal {
 
 	public List<String[]> listComb();
 
-	public String getXMLType(String[] parameters, DataConnection dataConnection);
+	public String getXMLType(String[] parameters, DataConnection dataConnection) throws ACDBException;
 	
 	public String updateInstancesXML();
 	

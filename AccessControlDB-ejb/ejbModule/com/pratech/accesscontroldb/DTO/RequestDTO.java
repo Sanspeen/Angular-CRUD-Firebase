@@ -25,6 +25,16 @@ public class RequestDTO extends DTO {
 	private int exportData;
 	private boolean SQLServer;
 	private String[] columnRowid;
+	//Modificado el 2012-05-23 por Juan
+	private boolean explainPlan;
+
+	public boolean isExplainPlan() {
+		return explainPlan;
+	}
+
+	public void setExplainPlan(boolean explainPlan) {
+		this.explainPlan = explainPlan;
+	}
 
 	public String getStringSQL() {
 		return stringSQL;

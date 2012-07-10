@@ -6,6 +6,7 @@ import suramericana.swb.security.SecurityAgent;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.pratech.accesscontroldb.client.AdminService;
 import com.pratech.accesscontroldb.core.SqlEngineSB;
+import com.pratech.accesscontroldb.persistence.Store;
 
 public class AdminServiceImpl extends RemoteServiceServlet implements
 AdminService {
@@ -15,13 +16,15 @@ AdminService {
 	public String updateInstancesXML() {
 		
 		boolean updateInstancesAccess;
-		boolean urlAdminServAccess;
 		SecurityAgent securityAgent;
 		
 		try {
 			securityAgent = SuraCacheManager.getSaFromCache(getThreadLocalRequest(), "ControlAccesoBd");
 		} catch (Exception e) {
+			//Registrar excepción
 			e.printStackTrace();
+			Store.getInstance().error("NA", "Error al obtener security agent", e);
+			
 			return "Ocurrió una excepción de tipo " + e.getClass().getName() + ". Mensaje: " + e.getMessage() + ".";
 		}
 		
@@ -29,8 +32,7 @@ AdminService {
 			//String resources = securityAgent.getResources();
 			//System.out.println("resources : " + resources);
 			updateInstancesAccess = securityAgent.hasAccess("ActualizarInstancias");
-			urlAdminServAccess = securityAgent.hasAccessToUrl("/accesscontroldb_war/adminservice");
-			if (updateInstancesAccess & urlAdminServAccess)
+			if (updateInstancesAccess)
 			{
 				SqlEngineSB sqlEngineSB = new SqlEngineSB();
 				String result = sqlEngineSB.updateInstancesXML();
@@ -41,7 +43,10 @@ AdminService {
 				return "No está autorizado para ejecutar la funcionalidad.";
 			}
 		} catch (Exception e) {
+			//Registrar excepción
 			e.printStackTrace();
+			Store.getInstance().error("NA", "Error ocurrió durante la actualización de las instancias", e);
+
 			return "Ocurrió una excepción de tipo " + e.getClass().getName() + " durante la actualización de las instancias. Mensaje: " + e.getMessage() + ".";
 		}
 		

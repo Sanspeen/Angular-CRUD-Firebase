@@ -5,6 +5,7 @@ import com.pratech.accesscontroldb.DTO.DataConnection;
 import com.pratech.accesscontroldb.DTO.LogSql;
 import com.pratech.accesscontroldb.DTO.RequestDTO;
 import com.pratech.accesscontroldb.DTO.ResponseDTO;
+import com.pratech.accesscontroldb.client.ACDBException;
 import com.pratech.accesscontroldb.common.ACConfig;
 import com.pratech.accesscontroldb.core.ad.ExecuteSql;
 import com.pratech.accesscontroldb.core.ad.IdentifyClientIdSession;
@@ -52,7 +53,7 @@ public class SqlEngineSB implements SqlEngineSBLocal {
 	 * @return = DTO con la informacion a retornar.
 	 */
 	public ResponseDTO doSql(RequestDTO requestDto,
-			List<BlocksVariable> lisBlo, DataConnection dataConnection) {
+			List<BlocksVariable> lisBlo, DataConnection dataConnection) throws ACDBException {
 
 		setDataInstance(dataConnection);
 
@@ -60,7 +61,12 @@ public class SqlEngineSB implements SqlEngineSBLocal {
 		ResponseDTO responseDTO = new ResponseDTO();
 		String SQL = requestDto.getStringSQL();
 		// String sql clean
-		if (!requestDto.isCommitBlock()) {
+		
+		//Modificado el 2012-05-23 por Juan
+		if(requestDto.isExplainPlan()){
+			requestDto.setTypeSql(3);		
+		}
+		else if (!requestDto.isCommitBlock()) {
 			SqlInstruction formatterSql = new SqlInstruction();
 			requestDto = formatterSql.editSql(requestDto, dataInstance);
 		} else {
@@ -85,6 +91,11 @@ public class SqlEngineSB implements SqlEngineSBLocal {
 				break;
 			case 2:
 				responseDTO = executeSql.executeBlock(requestDto, dataInstance);
+			//Modificado el 2012-05-23 por Juan
+				break;
+			case 3:
+				responseDTO=executeSql.executeExplainPlan(requestDto, dataInstance);
+				break;
 			}
 		}
 		/**
@@ -135,10 +146,9 @@ public class SqlEngineSB implements SqlEngineSBLocal {
 	 * @see com.pratech.accesscontroldb.core.SqlEngineSBLocal#connectionEntry(com
 	 *      .pratech.accesscontroldb.DTO.DataConnection)
 	 */
-	public String[] connectionEntry(DataConnection dataConnection) {
+	public String[] connectionEntry(DataConnection dataConnection) throws ACDBException {
 
 		XMLData xmlData = new XMLData();
-		StringBuffer errorDetail = new StringBuffer();
 		long transaccion = 0;
 		setDataInstance(dataConnection);
 		String url = xmlData.readURLXML(dataInstance.get("scope").trim(), dataInstance.get("instance").trim());
@@ -146,8 +156,7 @@ public class SqlEngineSB implements SqlEngineSBLocal {
 		dataInstance.put("url",url);
 
 		if (url.length() > 0) {
-			Store store = new Store();
-			Connection cn = ConnectionDB.createConnection(dataInstance, errorDetail);
+			Connection cn = ConnectionDB.createConnection(dataInstance);
 			if (url.indexOf("sqlserver") < 0) {
 				IdentifyClientIdSession.identifyClientIdSession(cn,
 						dataInstance);
@@ -179,12 +188,14 @@ public class SqlEngineSB implements SqlEngineSBLocal {
 								: dataInstance.get("observations") //longitud máxima de observations es 255
 				});
 				logSql.setCod("AC1");
-				store.save("1", logSql);
+				Store.getInstance().save("1", logSql);
 			}
 			try {
 				cn.close();
-			} catch (Exception ex) {
-				System.out.println(ex.getLocalizedMessage());
+			} catch (Exception e) {
+				//Registrar excepción
+				e.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error al cerrar conexión", e);
 			}
 			cn = null;
 		}
@@ -192,7 +203,7 @@ public class SqlEngineSB implements SqlEngineSBLocal {
 		if (url.toUpperCase().indexOf("SQLSERVER") < 0) {
 			isSQLServer = "0";
 		}
-		return new String[] { url, ACConfig.getValue("numRows"), isSQLServer, transaccion + "", errorDetail.toString() };
+		return new String[] { url, ACConfig.getValue("numRows"), isSQLServer, transaccion + "" };
 	}
 
 	/**
@@ -206,12 +217,13 @@ public class SqlEngineSB implements SqlEngineSBLocal {
 	 *            = Instruccion SQL ingresada.
 	 * 
 	 * @return DTO con la informacion a retornar.
+	 * @throws ACDBException 
 	 * 
 	 * @see com.pratech.accesscontroldb.core.SqlEngineSBLocal#updateRecords(java.util.List,
 	 *      com.pratech.accesscontroldb.DTO.DataConnection, java.lang.String)
 	 */
 	public ResponseDTO updateRecords(List<String[]> listUpdate,
-			DataConnection dataConnection, String SQLSelect) {
+			DataConnection dataConnection, String SQLSelect) throws ACDBException {
 		setDataInstance(dataConnection);
 		ResponseDTO responseDTO = new ResponseDTO();
 		ExecuteSql executeSql = new ExecuteSql();
@@ -227,7 +239,7 @@ public class SqlEngineSB implements SqlEngineSBLocal {
 	 *            = vector con los datos para obtener el datos CLOB vector
 	 *            positions 0 - Field name 1 - New data 2 - Table name
 	 */
-	public String getCLOB(String[] parameters, DataConnection dataConnection) {
+	public String getCLOB(String[] parameters, DataConnection dataConnection) throws ACDBException {
 		setDataInstance(dataConnection);
 		String commandTerminator = ACConfig.getValue("commandTerminator");
 		if (parameters[2].endsWith(commandTerminator)) {
@@ -275,7 +287,7 @@ public class SqlEngineSB implements SqlEngineSBLocal {
 		return xmlData.readXML();
 	}
 
-	public String getXMLType(String[] parameters, DataConnection dataConnection) {
+	public String getXMLType(String[] parameters, DataConnection dataConnection) throws ACDBException {
 		setDataInstance(dataConnection);
 		String commandTerminator = ACConfig.getValue("commandTerminator");
 		if (parameters[2].endsWith(commandTerminator)) {

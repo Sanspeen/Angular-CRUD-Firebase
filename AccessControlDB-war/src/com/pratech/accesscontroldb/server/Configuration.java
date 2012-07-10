@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import com.pratech.accesscontroldb.persistence.Store;
+
 /**
  * Clase para el manejo de configuraciones del programa
  * 
@@ -39,7 +41,9 @@ public class Configuration {
 			properties.load(is);
 
 		} catch (IOException ex) {
+			//Registrar excepción
 			ex.printStackTrace();
+			Store.getInstance().error("NA", "Error I/O al leer la configuración", ex);
 		}
 	}
 

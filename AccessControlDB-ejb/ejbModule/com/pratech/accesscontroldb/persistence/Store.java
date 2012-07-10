@@ -18,6 +18,36 @@ import suramericana.cronos.excepciones.UndefinedAplicationException;
 public class Store {
 
 	private String app_name = "ACCESSCONTROLDB";
+	private AuditoriaCronos auditoriaCronos = new AuditoriaCronos(null, app_name);
+	private LoggerCronos logger = new LoggerCronos(null, app_name);
+	
+	/**
+	 * Constructor privado.
+	 */
+	private Store(){
+		
+	}
+	
+    /**
+     * Obtiene la instancia del objeto
+     *
+     * @return Configuration
+     */
+    public static Store getInstance() {
+        return StoreHolder.INSTANCE;
+    }
+ 
+    /**
+     * Clase para gestión de la instancia única del objeto
+     * como establece el patrón Singleton.
+     *
+     */
+    private static class StoreHolder {
+    	/**
+    	 * Crea la instancia del objeto
+    	 */
+        private static final Store INSTANCE = new Store();
+    }
 	
 	/**
 	 * Guarda la auditoria
@@ -35,20 +65,15 @@ public class Store {
 			if (logSql.getCod().length() < 1) {
 				logSql.setCod("AC1");
 			}
-			AuditoriaCronos logger = null;
-			try {
-				logger = new AuditoriaCronos(null, app_name);
-			} catch (UndefinedAplicationException ex) {
-				ex.getLocalizedMessage();
-			}
+
 			if (logSql.getCamposTexto()[0].length() > 0) {
-				logger.info(logSql.getUsuario(), logSql.getCod(),
+				auditoriaCronos.info(logSql.getUsuario(), logSql.getCod(),
 						logSql.getTransaccion(),
 						logSql.getDescripcionAudit(), logSql.getProceso(),
 						logSql.getCamposTexto());
 
 			} else {
-				logger.info(logSql.getUsuario(), logSql.getCod(),
+				auditoriaCronos.info(logSql.getUsuario(), logSql.getCod(),
 						Long.parseLong("1"),
 						logSql.getDescripcionAudit(), logSql.getProceso());
 			}
@@ -58,25 +83,24 @@ public class Store {
 			if (logSql.getCod().length() < 1) {
 				logSql.setCod("AC2");
 			}
-			AuditoriaCronos logger = new AuditoriaCronos(null,
-					app_name);
 			try {
 
 				if (logSql.getCamposTexto()[0].length() > 0) {
-					logger.info(logSql.getUsuario(), logSql.getCod(),
+					auditoriaCronos.info(logSql.getUsuario(), logSql.getCod(),
 							logSql.getTransaccion(),
 							logSql.getDescripcionAudit(), logSql.getProceso(),
 							logSql.getCamposTexto());
 				} else {
 
-					logger.info(logSql.getUsuario(), logSql.getCod(),
+					auditoriaCronos.info(logSql.getUsuario(), logSql.getCod(),
 							Long.parseLong("1"),
 							logSql.getDescripcionAudit(), logSql.getProceso());
 				}
 
 			} catch (UndefinedAplicationException e) {
-
-				e.getLocalizedMessage();
+				//Registrar excepción
+				e.printStackTrace();
+				error("NA", "Error al escribir registro AC2 en auditoria", e);
 			}
 		}
 
@@ -84,18 +108,16 @@ public class Store {
 			if (logSql.getCod().length() < 1) {
 				logSql.setCod("AC3");
 			}
-
-			AuditoriaCronos loggerCronos = new AuditoriaCronos(null,
-					app_name);
 			try {
-				loggerCronos.info(logSql.getUsuario(), logSql.getCod(),
+				auditoriaCronos.info(logSql.getUsuario(), logSql.getCod(),
 						logSql.getTransaccion(),
 						logSql.getDescripcionAudit(), logSql.getProceso(),
 						logSql.getCamposTexto());
 
 			} catch (UndefinedAplicationException e) {
-
-				e.getLocalizedMessage();
+				//Registrar excepción
+				e.printStackTrace();
+				error("NA", "Error al escribir registro AC3 en auditoria", e);
 			}
 		}
 
@@ -103,16 +125,40 @@ public class Store {
 			if (logSql.getCod().length() < 1) {
 				logSql.setCod("AC4");
 			}
-
-			LoggerCronos logger = new LoggerCronos(null, app_name);
 			try {
 				logger.error(logSql.getCod(), logSql.getUsuario(),
 						logSql.getDescripcionAudit(),
 						logSql.getDescripcionAudit(), logSql.getThrowable());
 
 			} catch (UndefinedAplicationException e) {
-				e.getLocalizedMessage();
+				//Registrar excepción
+				e.printStackTrace();
+				error("NA", "Error al escribir registro AC4 en auditoria", e);
+			}
+		}
+		
+		//Modificado el 2012-05-24 por Juan
+		if (typeError.equals("5")) {
+			if (logSql.getCod().length() < 1) {
+				logSql.setCod("AC5");
+	}
+			try {
+				auditoriaCronos.info(logSql.getUsuario(), logSql.getCod(),
+						logSql.getTransaccion(),
+						logSql.getDescripcionAudit(), logSql.getProceso(),
+						logSql.getCamposTexto());
+
+			} catch (UndefinedAplicationException e) {
+				//Registrar excepción
+				e.printStackTrace();
+				error("NA", "Error al escribir registro AC5 en auditoria", e);
 			}
 		}
 	}
+	
+	public void error(String usuario, String mensajeUsuario,
+			Throwable excepcion) {
+		logger.error("NA", usuario, mensajeUsuario, excepcion != null? excepcion.getMessage() : "", excepcion);
+	}
+	
 }

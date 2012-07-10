@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 //import com.google.gwt.user.client.Window;
 import com.pratech.accesscontroldb.DTO.BlocksVariable;
 import com.pratech.accesscontroldb.DTO.RequestDTO;
+import com.pratech.accesscontroldb.client.ACDBException;
 import com.pratech.accesscontroldb.common.ACConfig;
 import com.pratech.accesscontroldb.core.ad.JdbcUtil;
 
@@ -41,9 +42,10 @@ public class SqlInstruction {
 	 * @param requestDTO
 	 *            = DTO with data from the view
 	 * @return DTO with the response data for the view
+	 * @throws ACDBException 
 	 */
 	public RequestDTO editSql(RequestDTO requestDTO,
-			Map<String, String> dataInstance) {
+			Map<String, String> dataInstance) throws ACDBException {
 
 		//Reemplaza valores entre comillas simples por PR@XI@S + consecutivo
 		String stringSQL = getTextString(requestDTO.getStringSQL());
@@ -242,7 +244,7 @@ public class SqlInstruction {
 	}
 
 	private RequestDTO insertRowid(Map<String, String> dataInstance,
-			String stringSQL, RequestDTO requestDTO) {
+			String stringSQL, RequestDTO requestDTO) throws ACDBException {
 		JdbcUtil jdbcUtil = new JdbcUtil();
 		String[] keys = jdbcUtil.getPrimaryKeys(dataInstance, stringSQL);
 

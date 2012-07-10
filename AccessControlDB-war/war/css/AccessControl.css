@@ -141,6 +141,11 @@ a:hover {
 	padding-left: 20px;
 }
 
+#queryMenu ul .btnExplainPlan {
+	background: url(../img/Zoom16.gif) no-repeat left center;
+	padding-left: 20px;
+}
+
 #queryMenu ul .btnSwitchInstance {
 	background: url(../img/iconSwitch.png) no-repeat left center;
 	padding-left: 20px;
@@ -350,11 +355,13 @@ table#tablaDatos tbody {
 	border: none !important;
 }
 
+/* JJaramillo 2012-06-27 Se disminuyó ancho a 99% porque aparecía cortado en scroll en explain plan */
 .gwt-TabPanelBottom .gwt-TextArea {
+	font-family: 'Courier New';
 	border: none !important;
 	padding-top: 25px !important;
 	height: 150px !important;
-	width: 100%;
+	width: 99% !important;
 }
 
 .gwt-DialogBox .dialogTopCenterInner .Caption {
@@ -656,4 +663,10 @@ span.CodeMirror-selected {
 	margin: 0px;
 	padding: 0px;
 	font-size: 9px;
+}
+
+/*Modificado por Juan 2012-05-25*/
+table.explainplan tbody td {
+	font-family: 'Courier New';
+	font-size: 11px;
 }

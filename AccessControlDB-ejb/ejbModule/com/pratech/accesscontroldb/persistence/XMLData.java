@@ -73,15 +73,18 @@ public class XMLData {
 			}			
 			lisCombo.add(data);
 
-		} catch (SAXException ex) {
-			Logger.getLogger(XMLData.class.getName()).log(Level.SEVERE, null,
-					ex);
-		} catch (IOException ex) {
-			Logger.getLogger(XMLData.class.getName()).log(Level.SEVERE, null,
-					ex);
-		} catch (ParserConfigurationException ex) {
-			Logger.getLogger(XMLData.class.getName()).log(Level.SEVERE, null,
-					ex);
+		} catch (SAXException e) {
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error("NA", "Error XML al leer archivos XML (diferentes de XML de instancias)", e);
+		} catch (IOException e) {
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error("NA", "Error I/O al leer archivos XML (diferentes de XML de instancias)", e);
+		} catch (ParserConfigurationException e) {
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error("NA", "Error configuración de parser al leer archivos XML (diferentes de XML de instancias)", e);
 		}
 		return lisCombo;
 	}
@@ -117,15 +120,18 @@ public class XMLData {
 					}
 				}
 			}
-		} catch (SAXException ex) {
-			Logger.getLogger(XMLData.class.getName()).log(Level.SEVERE, null,
-					ex);
-		} catch (IOException ex) {
-			Logger.getLogger(XMLData.class.getName()).log(Level.SEVERE, null,
-					ex);
-		} catch (ParserConfigurationException ex) {
-			Logger.getLogger(XMLData.class.getName()).log(Level.SEVERE, null,
-					ex);
+		} catch (SAXException e) {
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error("NA", "Error XML al leer archivo XML de instancias", e);
+		} catch (IOException e) {
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error("NA", "Error I/O al leer archivo XML de instancias", e);
+		} catch (ParserConfigurationException e) {
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error("NA", "Error configuración de parser al leer archivo XML de instancias", e);
 		}
 		return instanceNames;
 	}
@@ -152,15 +158,18 @@ public class XMLData {
 					ambList.add(ambName);
 				}
 			}
-		} catch (SAXException ex) {
-			Logger.getLogger(XMLData.class.getName()).log(Level.SEVERE, null,
-					ex);
-		} catch (IOException ex) {
-			Logger.getLogger(XMLData.class.getName()).log(Level.SEVERE, null,
-					ex);
-		} catch (ParserConfigurationException ex) {
-			Logger.getLogger(XMLData.class.getName()).log(Level.SEVERE, null,
-					ex);
+		} catch (SAXException e) {
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error("NA", "Error XML al leer archivo XML de instancias para ambientes", e);
+		} catch (IOException e) {
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error("NA", "Error I/O al leer archivo XML de instancias para ambientes", e);
+		} catch (ParserConfigurationException e) {
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error("NA", "Error configuración de parser al leer archivo XML de instancias para ambientes", e);
 		}
 		return ambList;
 	}
@@ -201,15 +210,18 @@ public class XMLData {
 					}
 				}
 			}
-		} catch (SAXException ex) {
-			Logger.getLogger(XMLData.class.getName()).log(Level.SEVERE, null,
-					ex);
-		} catch (IOException ex) {
-			Logger.getLogger(XMLData.class.getName()).log(Level.SEVERE, null,
-					ex);
-		} catch (ParserConfigurationException ex) {
-			Logger.getLogger(XMLData.class.getName()).log(Level.SEVERE, null,
-					ex);
+		} catch (SAXException e) {
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error("NA", "Error XML al leer archivo XML de instancias para URL", e);
+		} catch (IOException e) {
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error("NA", "Error I/O al leer archivo XML de instancias para URL", e);
+		} catch (ParserConfigurationException e) {
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error("NA", "Error configuración de parser al leer archivo XML de instancias para URL", e);
 		}
 		return null;
 	}
@@ -227,9 +239,10 @@ public class XMLData {
 			fileWriter.flush();
 			fileWriter.close();
 			return ACConstant.PATH_INSTANCES;
-		} catch (IOException ex) {
-			Logger.getLogger(XMLData.class.getName()).log(Level.SEVERE, null,
-					ex);
+		} catch (IOException e) {
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error("NA", "Error I/O al escribir archivo XML de instancias", e);
 		}
 		return null;
 	}
@@ -270,22 +283,28 @@ public class XMLData {
 					return validationMessage;
 				}
 			}
-		} catch (SAXException ex) {
-			Logger.getLogger(XMLData.class.getName()).log(Level.SEVERE, null,
-					ex);
+		} catch (SAXException e) {
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error("NA", "Se encontró error en formato de archivo XML de instancias", e);
+			
 			validationMessage += "por favor verifique que el formato del archivo XML este bien formado.";
 			return validationMessage;
-		} catch (FileNotFoundException ex) {
-			Logger.getLogger(XMLData.class.getName()).log(Level.SEVERE, null,
-					ex);
+		} catch (FileNotFoundException e) {
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error("NA", "No se encontró archivo de instancias para validarlo", e);
+
 			validationMessage += "no se encuentra el archivo.";
 			return validationMessage;
-		} catch (IOException ex) {
-			Logger.getLogger(XMLData.class.getName()).log(Level.SEVERE, null,
-					ex);
-		} catch (ParserConfigurationException ex) {
-			Logger.getLogger(XMLData.class.getName()).log(Level.SEVERE, null,
-					ex);
+		} catch (IOException e) {
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error("NA", "Error de I/O al leer archivo de instancias", e);
+		} catch (ParserConfigurationException e) {
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error("NA", "Error de configuración de parser al leer archivo de instancias", e);
 		}
 		return null;
 	}
@@ -314,7 +333,7 @@ public class XMLData {
 
 		try {
 			ambientes = ACConfig.getValue("SincAmbientes").split(",");
-			con = ConnectionDB.createConnection(new HashMap<String, String>(), null);
+			con = ConnectionDB.createConnection(new HashMap<String, String>());
 			String StrSQLXML = ACConfig.getValue("SQLXMLIntanciasPorAmbiente");
 			statement = con.prepareStatement(StrSQLXML);
 			
@@ -331,7 +350,10 @@ public class XMLData {
 					xmlInstancias.append(rs.getString(1));
 					try {
 						rs.close();
-					} catch (Exception ex) {
+					} catch (Exception e) {
+						//Registrar excepción
+						e.printStackTrace();
+						Store.getInstance().error("NA", "Error al cerrar conjunto de resultados", e);
 					}
 					rs = null;
 				}
@@ -364,26 +386,41 @@ public class XMLData {
 					message = "Fallo actualizando archivo de instancias: " + "no se pudo respaldar el archivo de instancias original.";
 				}
 			}
-		} catch (SQLException ex) {
-			Logger.getLogger("Error_Instancias").log(Level.SEVERE, null, ex);
-			message = "Fallo actualizando archivo de instancias: " + ex.getMessage();
-		} catch (Exception ex) {
-			Logger.getLogger("Error_Instancias").log(Level.SEVERE, null, ex);
-			message = "Fallo actualizando archivo de instancias: " + ex.getMessage();
+		} catch (SQLException e) {
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error("NA", "Error SQL al actualizar archivo de instancias XML", e);
+
+			message = "Fallo actualizando archivo de instancias: " + e.getMessage();
+		} catch (Exception e) {
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error("NA", "Error general al actualizar archivo de instancias XML", e);
+			
+			message = "Fallo actualizando archivo de instancias: " + e.getMessage();
 		} finally {
 			try {
 				rs.close();
-			} catch (Exception ex) {
+			} catch (Exception e) {
+				//Registrar excepción
+				e.printStackTrace();
+				Store.getInstance().error("NA", "Error al cerrar conjunto de resultados", e);
 			}
 			rs = null;
 			try {
 				statement.close();
-			} catch (Exception ex) {
+			} catch (Exception e) {
+				//Registrar excepción
+				e.printStackTrace();
+				Store.getInstance().error("NA", "Error al cerrar sentencia", e);
 			}
 			statement = null;
 			try {
 				con.close();
-			} catch (Exception ex) {
+			} catch (Exception e) {
+				//Registrar excepción
+				e.printStackTrace();
+				Store.getInstance().error("NA", "Error al cerrar conexión", e);
 			}
 			con = null;
 		}

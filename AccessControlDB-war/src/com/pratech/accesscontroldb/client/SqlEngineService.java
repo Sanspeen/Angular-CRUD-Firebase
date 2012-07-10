@@ -28,9 +28,10 @@ public interface SqlEngineService extends RemoteService {
 	 * @param lisBlo
 	 * @param dataConnection
 	 * @return
+	 * @throws ACDBException 
 	 */
 	public ResponseDTO sendSql(RequestDTO rq, List<BlocksVarible> lisBlo,
-			DataConnection dataConnection);
+			DataConnection dataConnection) throws ACDBException;
 
 	/**
 	 * Fill the combo environment
@@ -60,32 +61,36 @@ public interface SqlEngineService extends RemoteService {
 	 * 
 	 * @param dataConnection
 	 * @return
+	 * @throws ACDBException 
 	 */
-	public String[] connectionEntry(DataConnection dataConnection);
+	public String[] connectionEntry(DataConnection dataConnection) throws ACDBException;
 
 	/**
 	 * identifies the user information from SEUS
 	 * 
 	 * @return
+	 * @throws ACDBException 
 	 */
-	public String[] isUserAdmin();
+	public String[] isUserAdmin() throws ACDBException;
 
 	/**
 	 * Update the changed record in the results table
 	 * 
 	 * @param listUpdate
 	 * @return
+	 * @throws ACDBException 
 	 */
 	public ResponseDTO updateRecords(List<String[]> listUpdate,
-			DataConnection dataConnection, String SQLSelect);
+			DataConnection dataConnection, String SQLSelect) throws ACDBException;
 
 	/**
 	 * Gets as the information from a CLOB field
 	 * 
 	 * @param parameters
 	 * @return
+	 * @throws ACDBException 
 	 */
-	public String getCLOB(String[] parameters, DataConnection dataConnection);
+	public String getCLOB(String[] parameters, DataConnection dataConnection) throws ACDBException;
 	
 	String greetServer(String name) throws IllegalArgumentException;
 	
@@ -93,12 +98,14 @@ public interface SqlEngineService extends RemoteService {
 	
 	public List<String[]> listComb();
 	
-	public String getXMLType(String[] parameters, DataConnection dataConnection);
+	public String getXMLType(String[] parameters, DataConnection dataConnection) throws ACDBException;
 
 	Integer getUserSessionTimeout();
 	
 	Boolean isSessionAlive();
 	
 	void ping();	
+
+	String echo(String sqlBuffer);	
 	
 }

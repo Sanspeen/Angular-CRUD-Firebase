@@ -8,8 +8,10 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -28,6 +30,7 @@ import com.pratech.accesscontroldb.DTO.LogSql;
 import com.pratech.accesscontroldb.DTO.RequestDTO;
 import com.pratech.accesscontroldb.DTO.ResponseDTO;
 import com.pratech.accesscontroldb.util.SqlInstruction;
+import com.pratech.accesscontroldb.client.ACDBException;
 import com.pratech.accesscontroldb.common.ACConstant;
 import com.pratech.accesscontroldb.common.ACUtil;
 import com.pratech.accesscontroldb.core.connection.ConnectionDB;
@@ -65,12 +68,11 @@ public class ExecuteSql {
 		ResultSet rs = null;
 		ResultSet rsExcel = null;
 		LogSql logSql = new LogSql();
-		Store store = new Store();
 		boolean moreResults;
 		List<String[]> lis = new ArrayList<String[]>(0);
 
 		try {
-			con = ConnectionDB.createConnection(dataInstance, null);
+			con = ConnectionDB.createConnection(dataInstance);
 			if (!requestDTO.isSQLServer()) {
 				IdentifyClientIdSession.identifyClientIdSession(con,
 						dataInstance);
@@ -117,7 +119,7 @@ public class ExecuteSql {
 							dataInstance.get("instance"),
 							dataInstance.get("scope") });
 					logSql.setCod("AC3");
-					store.save("3", logSql);
+					Store.getInstance().save("3", logSql);
 				}
 
 			} else {
@@ -140,7 +142,7 @@ public class ExecuteSql {
 					logSql.setDescripcionAudit(requestDTO.getStringSQL());
 					logSql.setProceso("Class ExecuteSql, Procedure Execute");
 					logSql.setCod("AC2");
-					store.save("2", logSql);
+					Store.getInstance().save("2", logSql);
 				}
 			}
 
@@ -160,7 +162,11 @@ public class ExecuteSql {
 					dataInstance.get("user"), responseDto.getSqlBuffer(),
 					dataInstance.get("instance"), dataInstance.get("scope") });
 			logSql.setCod("AC3");
-			store.save("3", logSql);
+			Store.getInstance().save("3", logSql);
+			
+			//Registrar excepción
+			ex.printStackTrace();
+			Store.getInstance().error(dataInstance.get("user"), "Error SQL al procesar petición", ex);
 
 			try {
 				con.rollback();
@@ -175,7 +181,11 @@ public class ExecuteSql {
 				logSql.setDescripcionAudit(requestDTO.getStringSQL());
 				logSql.setProceso("Class ExecuteSql, Procedure Execute");
 				logSql.setCod("AC3");
-				store.save("1", logSql);
+				Store.getInstance().save("3", logSql);
+				
+				//Registrar excepción
+				e.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error haciendo rollback de conexión", e);
 			}
 		} catch (Exception e) {
 			responseDto.setSqlBuffer(e.getLocalizedMessage());
@@ -188,9 +198,11 @@ public class ExecuteSql {
 			logSql.setDescripcionAudit(requestDTO.getStringSQL());
 			logSql.setProceso("Class ExecuteSql, Procedure Execute");
 			logSql.setCod("AC3");
-			store.save("1", logSql);
+			Store.getInstance().save("3", logSql);
 
+			//Registrar excepción
 			e.printStackTrace();
+			Store.getInstance().error(dataInstance.get("user"), "Error general al procesar petición", e);
 		} finally {
 			try {
 				statement.close();
@@ -205,7 +217,11 @@ public class ExecuteSql {
 				logSql.setDescripcionAudit(requestDTO.getStringSQL());
 				logSql.setProceso("Class ExecuteSql, Procedure Execute");
 				logSql.setCod("AC3");
-				store.save("1", logSql);
+				Store.getInstance().save("3", logSql);
+				
+				//Registrar excepción
+				ex.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error al cerrar sentencia SQL", ex);
 			}
 			statement = null;
 		}
@@ -216,6 +232,11 @@ public class ExecuteSql {
 						ResultSet.CONCUR_READ_ONLY);
 				moreResults = statementExcel.execute(requestDTO.getStringSQL());
 				rsExcel = statementExcel.getResultSet();
+				//Modificacion por Juan Esteban 2012-06-06, fijar un
+				//tamaño de exportación de 10 veces el tamaño de página
+				//para acelerar el proceso de generación del archivo
+				rsExcel.setFetchSize(requestDTO.getNumRow() * 10);
+				System.err.println("FETCH SIZE : " + rsExcel.getFetchSize());
 				responseDto.setNameFileExport(wri.writeExcel(rsExcel, requestDTO));
 			} catch (SQLException e) {
 				Logger.getLogger(SqlResultSet.class.getName()).log(Level.SEVERE,
@@ -231,7 +252,11 @@ public class ExecuteSql {
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
 						dataInstance.get("instance"), dataInstance.get("scope") });
 				logSql.setCod("AC3");
-				store.save("3", logSql);
+				Store.getInstance().save("3", logSql);
+				
+				//Registrar excepción
+				e.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error SQL al ejecutar consulta para exportar excel", e);
 			} catch (Exception e) {
 				Logger.getLogger(SqlResultSet.class.getName()).log(Level.SEVERE,
 						null, e);
@@ -246,7 +271,11 @@ public class ExecuteSql {
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
 						dataInstance.get("instance"), dataInstance.get("scope") });
 				logSql.setCod("AC3");
-				store.save("3", logSql);
+				Store.getInstance().save("3", logSql);
+				
+				//Registrar excepción
+				e.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error general al ejecutar consulta para exportar excel", e);
 			} finally {
 				try {
 					rsExcel.close();
@@ -261,7 +290,11 @@ public class ExecuteSql {
 				logSql.setDescripcionAudit(requestDTO.getStringSQL());
 				logSql.setProceso("Class ExecuteSql, Procedure Execute");
 				logSql.setCod("AC3");
-				store.save("1", logSql);
+				Store.getInstance().save("3", logSql);
+				
+				//Registrar excepción
+				e.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error SQL al cerrar conjunto de resultados", e);
 				} finally {
 					rsExcel = null;
 				}
@@ -278,7 +311,11 @@ public class ExecuteSql {
 					logSql.setDescripcionAudit(requestDTO.getStringSQL());
 					logSql.setProceso("Class ExecuteSql, Procedure Execute");
 					logSql.setCod("AC3");
-					store.save("1", logSql);
+					Store.getInstance().save("3", logSql);
+					
+					//Registrar excepción
+					e.printStackTrace();
+					Store.getInstance().error(dataInstance.get("user"), "Error al cerrar sentencia SQL", e);
 				} finally {
 					statementExcel = null;
 			}
@@ -298,7 +335,11 @@ public class ExecuteSql {
 			logSql.setDescripcionAudit(requestDTO.getStringSQL());
 			logSql.setProceso("Class ExecuteSql, Procedure Execute");
 			logSql.setCod("AC3");
-			store.save("1", logSql);
+			Store.getInstance().save("3", logSql);
+			
+			//Registrar excepción
+			ex.printStackTrace();
+			Store.getInstance().error(dataInstance.get("user"), "Error al cerrar conexión", ex);
 		}
 		con = null;
 		
@@ -341,21 +382,21 @@ public class ExecuteSql {
 	 *            </ul>
 	 *            </p>
 	 * @return
+	 * @throws ACDBException 
 	 * @see https://forums.oracle.com/forums/thread.jspa?threadID=342798
 	 */
 	public ResponseDTO UpdateRecords(List<String[]> lisRecord,
-			Map<String, String> dataInstance, String SQLSelect) {
+			Map<String, String> dataInstance, String SQLSelect) throws ACDBException {
 		ResponseDTO responseDto = new ResponseDTO();
 		Connection con = null;
 		PreparedStatement ps = null;
 		LogSql logSql = new LogSql();
-		Store store = new Store();
 		String SQL = "";
 		String SQLCronos = "";
 		String numberDetail = null;
 
 		try {
-			con = ConnectionDB.createConnection(dataInstance, null);
+			con = ConnectionDB.createConnection(dataInstance);
 			IdentifyClientIdSession.identifyClientIdSession(con, dataInstance);
 			con.setAutoCommit(false);
 
@@ -419,9 +460,17 @@ public class ExecuteSql {
 					} catch (SQLException sqlexp) {
 						tempClob.freeTemporary();
 						sqlexp.printStackTrace();
+						
+						//Registrar excepción
+						sqlexp.printStackTrace();
+						Store.getInstance().error(dataInstance.get("user"), "Error SQL al escribir CLOB temporal", sqlexp);
 					} catch (Exception exp) {
 						tempClob.freeTemporary();
 						exp.printStackTrace();
+						
+						//Registrar excepción
+						exp.printStackTrace();
+						Store.getInstance().error(dataInstance.get("user"), "Error general al escribir CLOB temporal", exp);
 					}
 					ps.setClob(1, tempClob);
 				}
@@ -439,7 +488,7 @@ public class ExecuteSql {
 						dataInstance.get("user"), "SQL statement executed",
 						dataInstance.get("instance"), dataInstance.get("scope") });
 				logSql.setCod("AC2");
-				store.save("2", logSql);
+				Store.getInstance().save("2", logSql);
 			}
 			con.commit();
 			con.setAutoCommit(true);
@@ -454,7 +503,11 @@ public class ExecuteSql {
 					dataInstance.get("user"), responseDto.getSqlBuffer(),
 					dataInstance.get("instance"), dataInstance.get("scope") });
 			logSql.setCod("AC3");
-			store.save("3", logSql);
+			Store.getInstance().save("3", logSql);
+			
+			//Registrar excepción
+			ex.printStackTrace();
+			Store.getInstance().error(dataInstance.get("user"), "Error SQL durante la actualización de registros", ex);
 
 			try {
 				con.rollback();
@@ -469,12 +522,30 @@ public class ExecuteSql {
 				logSql.setDescripcionAudit(SQLCronos + ";" + SQLSelect);
 				logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
 				logSql.setCod("AC3");
-				store.save("1", logSql);
+				Store.getInstance().save("3", logSql);
+				
+				//Registrar excepción
+				e.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error al hacer rollback de la transacción", e);
 			}
-		} catch (Exception e) {
-			if (e instanceof NumberFormatException)
+		} catch (NumberFormatException e) {
 				responseDto.setSqlBuffer("Unparseable number: \"" + numberDetail + "\"");
-			else
+			
+			logSql.setTransaccion(dataInstance.get("transaction"));
+			logSql.setUsuario(dataInstance.get("analyst"));
+			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
+					dataInstance.get("user"), responseDto.getSqlBuffer(),
+					dataInstance.get("instance"), dataInstance.get("scope") });
+			logSql.setDescripcionAudit(SQLCronos + ";" + SQLSelect);
+			logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
+			logSql.setCod("AC3");
+			Store.getInstance().save("3", logSql);
+
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error(dataInstance.get("user"), "Error de usuario en formato de número", e);
+			
+		} catch (ParseException e) {
 			responseDto.setSqlBuffer(e.getLocalizedMessage());
 
 			logSql.setTransaccion(dataInstance.get("transaction"));
@@ -485,9 +556,12 @@ public class ExecuteSql {
 			logSql.setDescripcionAudit(SQLCronos + ";" + SQLSelect);
 			logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
 			logSql.setCod("AC3");
-			store.save("1", logSql);
+			Store.getInstance().save("3", logSql);
 
+			//Registrar excepción
 			e.printStackTrace();
+			Store.getInstance().error(dataInstance.get("user"), "Error de usuario en formato de fecha", e);
+			
 		} finally {
 			try {
 				ps.close();
@@ -502,7 +576,11 @@ public class ExecuteSql {
 				logSql.setDescripcionAudit(SQLCronos + ";" + SQLSelect);
 				logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
 				logSql.setCod("AC3");
-				store.save("1", logSql);
+				Store.getInstance().save("3", logSql);
+				
+				//Registrar excepción
+				ex.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error al cerrar una sentencia preparada", ex);
 			}
 			ps = null;
 			try {
@@ -518,7 +596,11 @@ public class ExecuteSql {
 				logSql.setDescripcionAudit(SQLCronos + ";" + SQLSelect);
 				logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
 				logSql.setCod("AC3");
-				store.save("1", logSql);
+				Store.getInstance().save("3", logSql);
+				
+				//Registrar excepción
+				ex.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error al cerrar una conexión", ex);
 			}
 			con = null;
 		}
@@ -533,18 +615,17 @@ public class ExecuteSql {
 	 * @param parameters
 	 * @return
 	 */
-	public String getCLOB(String[] parameters, Map<String, String> dataInstance) {
+	public String getCLOB(String[] parameters, Map<String, String> dataInstance) throws ACDBException {
 		Connection con = null;
 		Statement statement = null;
 		ResultSet rs = null;
 		String result = "";
 		LogSql logSql = new LogSql();
-		Store store = new Store();
 		boolean moreResult;
 		System.out.println(parameters[0] + " 1");
 
 		try {
-			con = ConnectionDB.createConnection(dataInstance, null);
+			con = ConnectionDB.createConnection(dataInstance);
 			System.out.println("Conexion");
 			if (dataInstance.get("url").indexOf("sqlserver") < 0) {
 				IdentifyClientIdSession.identifyClientIdSession(con,
@@ -578,26 +659,38 @@ public class ExecuteSql {
 					dataInstance.get("user"), "", dataInstance.get("instance"),
 					dataInstance.get("scope") });
 			logSql.setCod("AC3");
-			store.save("3", logSql);
-		} catch (IOException e) {
-			e.printStackTrace();
+			Store.getInstance().save("3", logSql);
+			
+			//Registrar excepción
+			ex.printStackTrace();
+			Store.getInstance().error(dataInstance.get("user"), "Error SQL al leer CLOB", ex);
+		} catch (IOException ex) {
+			//Registrar excepción
+			ex.printStackTrace();
+			Store.getInstance().error(dataInstance.get("user"), "Error I/O al leer CLOB", ex);
 		} finally {
 			try {
 				statement.close();
 			} catch (Exception ex) {
-				System.out.println(ex.getMessage());
+				//Registrar excepción
+				ex.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error al cerrar sentencia", ex);
 			}
 			statement = null;
 			try {
 				con.close();
 			} catch (Exception ex) {
-				System.out.println(ex.getMessage());
+				//Registrar excepción
+				ex.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error al cerrar conexión", ex);
 			}
 			con = null;
 			try {
 				rs.close();
 			} catch (Exception ex) {
-				System.out.println(ex.getMessage());
+				//Registrar excepción
+				ex.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error al cerrar conjunto de resultados", ex);
 			}
 			rs = null;
 		}
@@ -614,15 +707,14 @@ public class ExecuteSql {
 	 * @return
 	 */
 	public String getXMLType(String[] parameters,
-			Map<String, String> dataInstance) {
+			Map<String, String> dataInstance) throws ACDBException {
 		Connection con = null;
 		ResultSet rs = null;
 		String result = "";
 		LogSql logSql = new LogSql();
-		Store store = new Store();
 
 		try {
-			con = ConnectionDB.createConnection(dataInstance, null);
+			con = ConnectionDB.createConnection(dataInstance);
 			if (dataInstance.get("url").indexOf("sqlserver") < 0) {
 				IdentifyClientIdSession.identifyClientIdSession(con,
 						dataInstance);
@@ -689,23 +781,32 @@ public class ExecuteSql {
 					dataInstance.get("user"), "", dataInstance.get("instance"),
 					dataInstance.get("scope") });
 			logSql.setCod("AC3");
-			store.save("3", logSql);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Store.getInstance().save("3", logSql);
+			
+			//Registrar excepción
+			ex.printStackTrace();
+			Store.getInstance().error(dataInstance.get("user"), "Error SQL al leer XML", ex);
+		} catch (IOException ex) {
+			//Registrar excepción
+			ex.printStackTrace();
+			Store.getInstance().error(dataInstance.get("user"), "Error I/O al leer XML", ex);
 		} finally {
-			try {
-				con.close();
-			} catch (Exception ex) {
-				System.out.println(ex.getMessage());
-			}
-			con = null;
 			try {
 				rs.close();
 			} catch (Exception ex) {
-				System.out.println(ex.getMessage());
+				//Registrar excepción
+				ex.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error al cerrar conjunto de resultados", ex);
 			}
 			rs = null;
+			try {
+				con.close();
+			} catch (Exception ex) {
+				//Registrar excepción
+				ex.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error al cerrar conexión", ex);
+			}
+			con = null;
 		}
 		return result;
 	}
@@ -718,7 +819,7 @@ public class ExecuteSql {
 	 * @return
 	 */
 	public ResponseDTO executeSP(RequestDTO requestDTO,
-			List<BlocksVariable> lisBlo, Map<String, String> dataInstance) {
+			List<BlocksVariable> lisBlo, Map<String, String> dataInstance) throws ACDBException {
 
 		String SQL = SqlInstruction.replaceTextBlock(requestDTO.getStringSQL(),
 				lisBlo);
@@ -727,7 +828,6 @@ public class ExecuteSql {
 		ResultSet rs = null;
 		Connection con = null;
 		LogSql logSql = new LogSql();
-		Store store = new Store();
 
 		String variBloc = " - Varibles utilizadas";
 		for (BlocksVariable lis : lisBlo) {
@@ -747,7 +847,7 @@ public class ExecuteSql {
 		listData.add(new String[] { "", "", "Valores" });
 
 		try {
-			con = ConnectionDB.createConnection(dataInstance, null);
+			con = ConnectionDB.createConnection(dataInstance);
 			if (dataInstance.get("url").indexOf("sqlserver") < 0) {
 				IdentifyClientIdSession.identifyClientIdSession(con,
 						dataInstance);
@@ -798,7 +898,7 @@ public class ExecuteSql {
 					dataInstance.get("user"), "SQL statement executed",
 					dataInstance.get("instance"), dataInstance.get("scope") });
 			logSql.setCod("AC3");
-			store.save("3", logSql);
+			Store.getInstance().save("3", logSql);
 
 		} catch (SQLException e) {
 			responseDto.setSqlBuffer(e.getLocalizedMessage());
@@ -811,7 +911,11 @@ public class ExecuteSql {
 					dataInstance.get("user"), responseDto.getSqlBuffer(),
 					dataInstance.get("instance"), dataInstance.get("scope") });
 			logSql.setCod("AC3");
-			store.save("3", logSql);
+			Store.getInstance().save("3", logSql);
+			
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error(dataInstance.get("user"), "Error al cerrar conexión", e);
 		} finally {
 			try {
 				cstmt.close();
@@ -826,7 +930,11 @@ public class ExecuteSql {
 				logSql.setDescripcionAudit(requestDTO.getStringSQL() + variBloc);
 				logSql.setProceso("Class ExecuteSql, Procedure Execute");
 				logSql.setCod("AC3");
-				store.save("1", logSql);
+				Store.getInstance().save("3", logSql);
+				
+				//Registrar excepción
+				ex.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error al cerrar sentencia invocable", ex);
 			}
 			cstmt = null;
 			try {
@@ -844,7 +952,11 @@ public class ExecuteSql {
 				logSql.setDescripcionAudit(requestDTO.getStringSQL() + variBloc);
 				logSql.setProceso("Class ExecuteSql, Procedure Execute");
 				logSql.setCod("AC3");
-				store.save("1", logSql);
+				Store.getInstance().save("3", logSql);
+				
+				//Registrar excepción
+				ex.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error al cerrar conjunto de resultados", ex);
 			}
 			rs = null;
 			try {
@@ -860,7 +972,11 @@ public class ExecuteSql {
 				logSql.setDescripcionAudit(requestDTO.getStringSQL() + variBloc);
 				logSql.setProceso("Class ExecuteSql, Procedure Execute");
 				logSql.setCod("AC3");
-				store.save("1", logSql);
+				Store.getInstance().save("3", logSql);
+				
+				//Registrar excepción
+				ex.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error al cerrar conexión", ex);
 			}
 			con = null;
 		}
@@ -873,15 +989,14 @@ public class ExecuteSql {
 		Connection con = null;
 		Statement statement = null;
 		LogSql logSql = new LogSql();
-		Store store = new Store();
 
 		try {
-			con = ConnectionDB.createConnection(dataInstance, null);
+			con = ConnectionDB.createConnection(dataInstance);
 			if (dataInstance.get("url").indexOf("sqlserver") < 0) {
 				IdentifyClientIdSession.identifyClientIdSession(con,
 						dataInstance);
-				con.setAutoCommit(false);
 			}
+			con.setAutoCommit(false);
 
 			responseDto.setSqlBuffer(printAllExceptions(con.getWarnings()));
 			statement = con.createStatement();
@@ -900,6 +1015,10 @@ public class ExecuteSql {
 				} catch (SQLException e) {
 					if (requestDTO.isCommitBlock()) {
 						responseDto.setSqlBuffer(e.getLocalizedMessage());
+						
+						//Registrar excepción
+						e.printStackTrace();
+						Store.getInstance().error(dataInstance.get("user"), "Error al ejecutar sentencias en bloque", e);
 					} else {
 						lisTem.add(new String[] {
 								SqlInstruction.deleteComments(requestDTO
@@ -928,7 +1047,7 @@ public class ExecuteSql {
 				logSql.setDescripcionAudit(resu);
 				logSql.setProceso("Class ExecuteSql, Procedure Execute");
 				logSql.setCod("AC2");
-				store.save("2", logSql);
+				Store.getInstance().save("2", logSql);
 			} else {
 					responseDto
 							.setSqlBuffer("All instructions were executed correctly");
@@ -949,7 +1068,11 @@ public class ExecuteSql {
 					dataInstance.get("user"), responseDto.getSqlBuffer(),
 					dataInstance.get("instance"),dataInstance.get("scope") });
 			logSql.setCod("AC3");
-			store.save("3", logSql);
+			Store.getInstance().save("3", logSql);
+			
+			//Registrar excepción
+			ex.printStackTrace();
+			Store.getInstance().error(dataInstance.get("user"), "Error SQL al ejecutar sentencias en bloque", ex);
 
 			try {
 				con.rollback();
@@ -964,7 +1087,11 @@ public class ExecuteSql {
 				logSql.setDescripcionAudit(requestDTO.getStringSQL());
 				logSql.setProceso("Class ExecuteSql, Procedure executeBlock");
 				logSql.setCod("AC3");
-				store.save("1", logSql);
+				Store.getInstance().save("3", logSql);
+				
+				//Registrar excepción
+				e.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error al ejecutar rollback", e);
 			}
 		} catch (Exception e) {
 			responseDto.setSqlBuffer(e.getLocalizedMessage());
@@ -977,9 +1104,11 @@ public class ExecuteSql {
 			logSql.setDescripcionAudit(requestDTO.getStringSQL());
 			logSql.setProceso("Class ExecuteSql, Procedure executeBlock");
 			logSql.setCod("AC3");
-			store.save("1", logSql);
+			Store.getInstance().save("1", logSql);
 
+			//Registrar excepción
 			e.printStackTrace();
+			Store.getInstance().error(dataInstance.get("user"), "Error general al ejecutar sentencias en bloque", e);
 		} finally {
 			try {
 				statement.close();
@@ -994,7 +1123,11 @@ public class ExecuteSql {
 				logSql.setDescripcionAudit(requestDTO.getStringSQL());
 				logSql.setProceso("Class ExecuteSql, Procedure executeBlock");
 				logSql.setCod("AC3");
-				store.save("1", logSql);
+				Store.getInstance().save("3", logSql);
+				
+				//Registrar excepción
+				ex.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error al cerrar sentencia", ex);
 			}
 			statement = null;
 			try {
@@ -1010,10 +1143,222 @@ public class ExecuteSql {
 				logSql.setDescripcionAudit(requestDTO.getStringSQL());
 				logSql.setProceso("Class ExecuteSql, Procedure executeBlock");
 				logSql.setCod("AC3");
-				store.save("1", logSql);
+				Store.getInstance().save("3", logSql);
+				
+				//Registrar excepción
+				ex.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error general al cerrar conexión", ex);
 			}
 			con = null;
 		}
+		return responseDto;
+	}
+	
+	// Modificado el 2012-05-24 por Juan
+	public ResponseDTO executeExplainPlan(RequestDTO requestDTO,
+			Map<String, String> dataInstance) throws ACDBException {
+		ResponseDTO responseDto = new ResponseDTO();
+		Connection con = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		LogSql logSql = new LogSql();
+		boolean moreResults;
+		List<String[]> lis = new ArrayList<String[]>(0);
+		String realQuery = requestDTO.getStringSQL();
+		StringBuffer oracleResult = null; //Resultado para Oracle va en texto
+		
+		if (requestDTO.isExplainPlan() && requestDTO.getTypeSql() == 3) {
+			try {
+				con = ConnectionDB.createConnection(dataInstance);
+
+				if (!requestDTO.isSQLServer()) {
+					IdentifyClientIdSession.identifyClientIdSession(con,
+							dataInstance);
+				}
+				con.setAutoCommit(false);
+
+				responseDto.setSqlBuffer(printAllExceptions(con.getWarnings()));
+				statement = con.createStatement();
+				// statement.setFetchSize(requestDTO.getNumRow());
+
+				con.clearWarnings();
+
+				// Modificado el 2012-05-28 por Juan
+				// ID Mantis 0003693
+				if (realQuery.trim().indexOf(";") >= 0) {
+					String tem = realQuery.trim();
+					if(tem.endsWith(";")){
+						tem = tem.substring(0,tem.length()-1);	
+					}					
+					requestDTO.setStringSQL(tem);
+			}
+
+				// validacion si es un SqlServer para ejecutar el explain plan
+				if (!requestDTO.isSQLServer()) {
+					JdbcUtil.enable_dbms_output(con, ACConstant.SIZE_BUFFER,
+							dataInstance);
+
+					requestDTO.setStringSQL("explain plan for "
+							+ requestDTO.getStringSQL());
+
+				} else {
+					// es sql Server
+					int numero = statement.executeUpdate("SET SHOWPLAN_ALL ON");
+					if (numero == 0) {
+
+					}
+					// requestDTO.setStringSQL("SET SHOWPLAN_ALL ON;GO "+requestDTO.getStringSQL());
+				}
+				moreResults = statement.execute(requestDTO.getStringSQL());
+				// moreResults=statement.getMoreResults();
+				if (!requestDTO.isSQLServer()) {
+
+					moreResults = statement
+							.execute("select plan_table_output from table(dbms_xplan.display())");
+
+					responseDto = JdbcUtil.print_dbms_output(con, responseDto,
+							dataInstance);
+				}
+				
+				//Obtener los resultados de acuerdo al motor...
+				//Oracle -> texto
+				//SQLServer -> tabla
+				if (requestDTO.isSQLServer()) {
+					//Obtener resultados para SQLServer (los resultados van como una tabla)
+					if (moreResults) {
+						rs = statement.getResultSet();
+						// aqui se devuelve los datos para la tabla
+						rs.setFetchSize(requestDTO.getNumRow());
+	
+						// SqlResultSet sqlResultSet = new SqlResultSet();
+						// lis = sqlResultSet.getList(rs, requestDTO);
+						// sqlResultSet.getList() retorna la cantidad
+						// de filas de dartos indicada por requestDTO.getNumRow()
+						String[] rowTypes;
+						String[] rowTitles;
+						String[] row;
+						ResultSetMetaData rsmd = rs.getMetaData();
+						int colCount = rsmd.getColumnCount();
+	
+						rowTypes = SqlResultSet.readTypes(rsmd, colCount);
+						lis.add(rowTypes);
+	
+						rowTitles = SqlResultSet.readTitles(rsmd, colCount);
+						lis.add(rowTitles);
+						while (rs.next()) {
+	
+							row = SqlResultSet.readRow(rs, requestDTO, colCount);
+							lis.add(row);
+							for (String r : row)
+							{
+								r.replaceAll("[\\s]", "&nbsp;");
+							}
+						}
+						responseDto.setListData(lis);
+	
+						responseDto.setTotalRows(rs.getRow());
+						rs.close();
+
+						statement.executeUpdate("SET SHOWPLAN_ALL OFF");
+					}
+				} else {
+					//Obtener resultados para Oracle (los resultados van como un texto)
+					oracleResult = new StringBuffer();
+					
+					if (moreResults) {
+						rs = statement.getResultSet();
+						rs.setFetchSize(requestDTO.getNumRow());
+	
+						while (rs.next()) {
+							oracleResult.append(rs.getString(1));
+							oracleResult.append("\r\n");
+						}
+						responseDto.setSqlBuffer(oracleResult.toString());
+						rs.close();
+					}
+				}
+				logSql.setTransaccion(dataInstance.get("transaction"));
+				logSql.setUsuario(dataInstance.get("analyst"));
+				logSql.setDescripcionAudit(realQuery);
+				logSql.setProceso("Class ExecuteSql, Procedure executeExplainPlan");
+				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
+						dataInstance.get("user"), "Explain plan executed",
+						dataInstance.get("instance"), dataInstance.get("scope") });
+				logSql.setCod("AC5");
+				Store.getInstance().save("5", logSql);
+			} catch (SQLException e) {
+				responseDto.setSqlBuffer(e.getLocalizedMessage());
+
+				logSql.setTransaccion(dataInstance.get("transaction"));
+				logSql.setUsuario(dataInstance.get("analyst"));
+				logSql.setDescripcionAudit(realQuery);
+				logSql.setProceso("Class ExecuteSql, Procedure executeExplainPlan");
+				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
+						dataInstance.get("user"), responseDto.getSqlBuffer(),
+						dataInstance.get("instance"), dataInstance.get("scope") });
+				logSql.setCod("AC5");
+				Store.getInstance().save("5", logSql);
+
+				// Registrar excepción
+				e.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"),
+						"Error al obtener el Explain plan", e);
+			} finally {
+				if (statement != null) {
+					try {
+						statement.close();
+						statement = null;
+					} catch (SQLException e) {
+						responseDto.setSqlBuffer(e.getLocalizedMessage());
+
+						logSql.setTransaccion(dataInstance.get("transaction"));
+						logSql.setUsuario(dataInstance.get("analyst"));
+						logSql.setDescripcionAudit(realQuery);
+						logSql.setProceso("Class ExecuteSql, Procedure executeExplainPlan");
+						logSql.setCamposTexto(new String[] {
+								dataInstance.get("url"),
+								dataInstance.get("user"),
+								responseDto.getSqlBuffer(),
+								dataInstance.get("instance"),
+								dataInstance.get("scope") });
+						logSql.setCod("AC5");
+						Store.getInstance().save("5", logSql);
+
+						// Registrar excepción
+						e.printStackTrace();
+						Store.getInstance().error(dataInstance.get("user"),
+								"Error al cerrar el stament explain plan", e);
+					}
+				}
+				if (con != null) {
+					try {
+						con.close();
+			con = null;
+					} catch (SQLException e) {
+						responseDto.setSqlBuffer(e.getLocalizedMessage());
+
+						logSql.setTransaccion(dataInstance.get("transaction"));
+						logSql.setUsuario(dataInstance.get("analyst"));
+						logSql.setDescripcionAudit(realQuery);
+						logSql.setProceso("Class ExecuteSql, Procedure executeExplainPlan");
+						logSql.setCamposTexto(new String[] {
+								dataInstance.get("url"),
+								dataInstance.get("user"),
+								responseDto.getSqlBuffer(),
+								dataInstance.get("instance"),
+								dataInstance.get("scope") });
+						logSql.setCod("AC5");
+						Store.getInstance().save("5", logSql);
+
+						// Registrar excepción
+						e.printStackTrace();
+						Store.getInstance().error(dataInstance.get("user"),
+								"Error al cerrar la conexion explain plan", e);
+		}
+				}
+			}
+		}
+
 		return responseDto;
 	}
 }

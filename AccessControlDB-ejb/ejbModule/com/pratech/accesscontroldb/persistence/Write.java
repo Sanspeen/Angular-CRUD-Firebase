@@ -32,6 +32,9 @@ public class Write {
 	public String writeExcel(ResultSet rs, RequestDTO requestDTO)
 			throws SQLException, Exception {
 
+		//Modificado el 2012-05-24 por Juan
+		int rowMax=Integer.parseInt(ACConfig.getValue("maxRowsExport"));
+		
 		//Nombre archivo Excel
 		String fileName = "";
 		//Se crea el libro
@@ -86,7 +89,8 @@ public class Write {
 					}
 					more = rs.next();
 					
-				if (rowIndex == 65000) {
+				//Modificado el 2012-05-24 por Juan
+				if (rowIndex == rowMax) {
 						break;
 					}
 					rowIndex++;

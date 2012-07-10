@@ -2,6 +2,7 @@ package com.pratech.accesscontroldb.server;
 
 import co.com.suramericana.seus.ws.interfaces.SeusWs_SeusWsImplPort_Client;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.pratech.accesscontroldb.client.ACDBException;
 import com.pratech.accesscontroldb.client.SqlEngineService;
 import com.pratech.accesscontroldb.client.DTO.BlocksVarible;
 import com.pratech.accesscontroldb.client.DTO.DataConnection;
@@ -9,6 +10,7 @@ import com.pratech.accesscontroldb.client.DTO.RequestDTO;
 import com.pratech.accesscontroldb.client.DTO.ResponseDTO;
 import com.pratech.accesscontroldb.common.Configuration;
 import com.pratech.accesscontroldb.core.SqlEngineSB;
+import com.pratech.accesscontroldb.persistence.Store;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +22,7 @@ public class SqlEngineServiceImpl extends RemoteServiceServlet implements
 	private int timeout;
 
 	public ResponseDTO sendSql(RequestDTO rq, List<BlocksVarible> listBlock,
-			DataConnection dataConnection) {
+			DataConnection dataConnection) throws ACDBException {
 		ResponseDTO response = new ResponseDTO();
 		com.pratech.accesscontroldb.DTO.RequestDTO requestRemote = new com.pratech.accesscontroldb.DTO.RequestDTO();
 
@@ -43,6 +45,8 @@ public class SqlEngineServiceImpl extends RemoteServiceServlet implements
 		requestRemote.setCommitBlock(rq.isCommitBlock());
 		requestRemote.setExportData(rq.getExportData());
 		requestRemote.setSQLServer(rq.isSQLServer());
+		//Modificado el 2012-05-23 por Juan
+		requestRemote.setExplainPlan(rq.isExplainPlan());
 
 		dConneRemote = passDataConnection(dataConnection);
 
@@ -99,7 +103,7 @@ public class SqlEngineServiceImpl extends RemoteServiceServlet implements
 
 	}
 
-	public String[] connectionEntry(DataConnection dataConnection) {
+	public String[] connectionEntry(DataConnection dataConnection) throws ACDBException {
 		com.pratech.accesscontroldb.DTO.DataConnection dConneRemote = new com.pratech.accesscontroldb.DTO.DataConnection();
 
 		dConneRemote = passDataConnection(dataConnection);
@@ -109,7 +113,7 @@ public class SqlEngineServiceImpl extends RemoteServiceServlet implements
 	}
 
 	public ResponseDTO updateRecords(List<String[]> listUpdate,
-			DataConnection dataConnection, String SQLSelect) {
+			DataConnection dataConnection, String SQLSelect) throws ACDBException {
 		ResponseDTO response = new ResponseDTO();
 		com.pratech.accesscontroldb.DTO.ResponseDTO responsetRemote = new com.pratech.accesscontroldb.DTO.ResponseDTO();
 		com.pratech.accesscontroldb.DTO.DataConnection dConneRemote = new com.pratech.accesscontroldb.DTO.DataConnection();
@@ -125,7 +129,7 @@ public class SqlEngineServiceImpl extends RemoteServiceServlet implements
 		return response;
 	}
 
-	public String getCLOB(String[] parameters, DataConnection dataConnection) {
+	public String getCLOB(String[] parameters, DataConnection dataConnection) throws ACDBException {
 		com.pratech.accesscontroldb.DTO.DataConnection dConneRemote = new com.pratech.accesscontroldb.DTO.DataConnection();
 
 		dConneRemote = passDataConnection(dataConnection);
@@ -134,7 +138,7 @@ public class SqlEngineServiceImpl extends RemoteServiceServlet implements
 		return sqlEngineSB.getCLOB(parameters, dConneRemote);
 	}
 
-	public String getXMLType(String[] parameters, DataConnection dataConnection) {
+	public String getXMLType(String[] parameters, DataConnection dataConnection) throws ACDBException {
 		com.pratech.accesscontroldb.DTO.DataConnection dConneRemote = new com.pratech.accesscontroldb.DTO.DataConnection();
 
 		dConneRemote = passDataConnection(dataConnection);
@@ -143,7 +147,7 @@ public class SqlEngineServiceImpl extends RemoteServiceServlet implements
 		return sqlEngineSB.getXMLType(parameters, dConneRemote);
 	}
 
-	public String[] isUserAdmin() {
+	public String[] isUserAdmin() throws ACDBException {
 
 		try {
 		String urlReferer = getThreadLocalRequest().getHeader("referer");
@@ -161,7 +165,9 @@ public class SqlEngineServiceImpl extends RemoteServiceServlet implements
 		return new String[] { userSeus.getName().getValue(),
 				userSeus.getLogin().getValue() };
 		} catch (RuntimeException e) {
+			//Registrar excepción
 			e.printStackTrace();
+			Store.getInstance().error("NA", "Error al obtener información de usuario", e);
 			throw e;
 		}
 	}
@@ -230,6 +236,9 @@ public class SqlEngineServiceImpl extends RemoteServiceServlet implements
 	public void ping() {
 	}
 
-
+	//Se utiliza para mostrar los resultados del explain plan
+	public String echo(String s) {
+		return s;
+	}
 
 }

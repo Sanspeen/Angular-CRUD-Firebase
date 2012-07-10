@@ -18,6 +18,10 @@ public class MyAsyncCallback<T> implements AsyncCallback<T> {
         	Window.alert("Su sesi\u00F3n ha expirado. \nPor favor ingrese nuevamente o actualice la p\u00e1gina.");
             return;
         }
+        if (caught instanceof ACDBException) {
+        	Window.alert(caught.getMessage());
+            return;
+        }
 
         asyncCallback.onFailure(caught);
     }

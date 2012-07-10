@@ -48,5 +48,6 @@ public interface SqlEngineServiceAsync {
 
 	void ping(AsyncCallback callback);
 
+	void echo(String sqlBuffer, AsyncCallback<String> asyncCallback);
 
 }

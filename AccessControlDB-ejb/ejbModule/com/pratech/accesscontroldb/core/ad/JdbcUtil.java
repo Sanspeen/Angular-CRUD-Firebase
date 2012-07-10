@@ -2,6 +2,7 @@ package com.pratech.accesscontroldb.core.ad;
 
 import com.pratech.accesscontroldb.DTO.LogSql;
 import com.pratech.accesscontroldb.DTO.ResponseDTO;
+import com.pratech.accesscontroldb.client.ACDBException;
 import com.pratech.accesscontroldb.core.connection.ConnectionDB;
 import com.pratech.accesscontroldb.persistence.Store;
 import com.pratech.accesscontroldb.util.SqlInstruction;
@@ -49,7 +50,11 @@ public class JdbcUtil {
 					+ e.toString());
 			logSql.setProceso("Class " + JdbcUtil.class.getName()
 					+ ", Procedure enable_dbms_output");
-			new Store().save("2", logSql);
+			Store.getInstance().save("2", logSql);
+			
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error(dataInstance.get("user"), "Error general al habilitar salida del motor de la base de datos", e);
 		}
 	}
 
@@ -91,14 +96,18 @@ public class JdbcUtil {
 			logSql.setDescripcionAudit(result);
 			logSql.setProceso("Class " + JdbcUtil.class.getName()
 					+ ", Procedure print_dbms_output");
-			new Store().save("2", logSql);
+			Store.getInstance().save("2", logSql);
 			responseDTO.setSqlBuffer(result);
+			
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error(dataInstance.get("user"), "Error al recuperar informacion mostrada en buffer", e);
 		}
 		return responseDTO;
 	}
 
 	public String[] getPrimaryKeys(Map<String, String> dataInstance,
-			String StringSQL) {
+			String StringSQL) throws ACDBException {
 		Connection con = null;
 		ResultSet rs = null;
 		String[] primaryKeys = null;
@@ -106,7 +115,7 @@ public class JdbcUtil {
 		try {
 			String nameTable = SqlInstruction.getTableFromSql(StringSQL);
 
-			con = ConnectionDB.createConnection(dataInstance, null);
+			con = ConnectionDB.createConnection(dataInstance);
 			DatabaseMetaData meta = con.getMetaData();
 			rs = meta.getPrimaryKeys(null, null, nameTable);
 			String keys = "";
@@ -115,21 +124,27 @@ public class JdbcUtil {
 			}			
 			primaryKeys = keys.split(",");
 
-		} catch (SQLException ex) {
-			ex.printStackTrace();
+		} catch (SQLException e) {
+			//Registrar excepción
+			e.printStackTrace();
+			Store.getInstance().error(dataInstance.get("user"), "Error general al obtener la llave primaria", e);
 		} finally {
 			try {
-				con.close();
-			} catch (Exception ex) {
-				System.out.println(ex.getMessage());
-			}
-			con = null;
-			try {
 				rs.close();
-			} catch (Exception ex) {
-				System.out.println(ex.getMessage());
+			} catch (Exception e) {
+				//Registrar excepción
+				e.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error general al cerrar conjunto de resultados", e);
 			}
 			rs = null;
+			try {
+				con.close();
+			} catch (Exception e) {
+				//Registrar excepción
+				e.printStackTrace();
+				Store.getInstance().error(dataInstance.get("user"), "Error general al cerrar la conexión", e);
+			}
+			con = null;
 		}
 		return primaryKeys;
 	}

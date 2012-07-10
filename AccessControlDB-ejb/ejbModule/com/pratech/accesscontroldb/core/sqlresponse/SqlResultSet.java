@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import oracle.sql.ROWID;
 
 import com.pratech.accesscontroldb.DTO.RequestDTO;
+import com.pratech.accesscontroldb.persistence.Store;
 
 /**
  * Procesa el ResulSet
@@ -156,14 +157,27 @@ public class SqlResultSet {
 										BufferedReader br = new BufferedReader(
 												cl.getCharacterStream());
 
+										/* JJaramillo - 2012-06-26 - Alejandro Marulanda de Sura
+										 *                           envió un reemplazo para este while 
+										 *                           para corregir un error de exportación de datos
+										 *                           CLOB
 										while ((aux = br.readLine()) != null) {
 											strOut.append(aux);
+										}*/
+										
+										/* JJaramillo - 2012-06-26 - Este fue el reemplazo recibido de Alejandro Marulanda */
+                                        while ((aux = br.readLine()) != null) {
+                                            aux = aux.replaceAll("\\f|\\b", "");
+                                            if(aux != "") {
+                                            	strOut.append(aux + "\r\n");
 										}
+                                        }
+										
 										row[i] = strOut.toString();
-									} catch (Exception ex) {
-										Logger.getLogger(
-												SqlResultSet.class.getName())
-												.log(Level.SEVERE, null, ex);
+									} catch (Exception e) {
+										//Registrar excepción
+										e.printStackTrace();
+										Store.getInstance().error("NA", "Error SQL al leer el CLOB", e);
 									}
 
 								} else {

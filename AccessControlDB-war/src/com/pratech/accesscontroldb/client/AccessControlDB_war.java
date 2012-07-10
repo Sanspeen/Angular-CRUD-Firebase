@@ -173,6 +173,10 @@ public class AccessControlDB_war implements EntryPoint {
 	private Button btnExecute = new Button("Execute");
 	private Button btnChange = new Button("Change Instance");
 	private Button btnClear = new Button("Clear");
+	
+	//Modificado el 2012-05-23 por Juan
+	private Button btnExplainPlan=new Button("Explain Plan");
+	
 	private ResponseDTO responseDTO = new ResponseDTO();
 	private RequestDTO requestDTO = new RequestDTO();
 	private DataConnection dataConnection = new DataConnection();
@@ -225,11 +229,13 @@ public class AccessControlDB_war implements EntryPoint {
 	// Manejo de time out
 	private Timer sessionTimeoutResponseTimer;
 	private Integer timeoutCicle;
+	private String explainPlanDetails;
 
 	/**
 	 * Creates a new instance of MainEntryPoint
 	 */
 	public AccessControlDB_war() {
+		
 	}
 
 	public void onModuleLoad() {
@@ -238,6 +244,11 @@ public class AccessControlDB_war implements EntryPoint {
 		// rootMain();
 	}
 
+	private int countLines(String str){
+		   String[] lines = str.split("\r\n|\r|\n");
+		   return  lines.length;
+		}
+	
 	/**
 	 * Send information to execute the SQL query
 	 * 
@@ -287,6 +298,7 @@ public class AccessControlDB_war implements EntryPoint {
 					public void onSuccess(ResponseDTO result) {
 						responseDTO = result;
 						txtrBuffer.setText(responseDTO.getSqlBuffer());
+						
 						List<String[]> temLis = new ArrayList<String[]>(0);
 
 						if (responseDTO.getListBlockSQL() == null) {
@@ -302,6 +314,10 @@ public class AccessControlDB_war implements EntryPoint {
 						} else {
 							if (txtrBuffer.getText().length() > 0) {
 								tabPanel.selectTab(2);
+								//JJaramillo - 2012-06-26 - Identificar caso explain plan
+								if (requestDTO.isExplainPlan()) {
+									explainPlanDetails = responseDTO.getSqlBuffer();
+								}
 							}
 
 							if (responseDTO.getListData() == null) {
@@ -329,14 +345,16 @@ public class AccessControlDB_war implements EntryPoint {
 											.length() > 0) {
 											if (responseDTO.getNameFileExport()
 												.equals("<error>")) {
-												Window.alert("Ocurri\u00f3 un error durante la generaci\u00f3n del archivo Excel. " +
-														"Por favor intente generarlo nuevamente.");
+											Window.alert("Ocurri\u00f3 un error durante la generaci\u00f3n del archivo Excel. "
+													+ "Por favor intente generarlo nuevamente.");
 											} else {
-										Window.open(GWT.getHostPageBaseURL()
+											Window.open(
+													GWT.getHostPageBaseURL()
 													+ "/ExcelSender?filename="
 												+ responseDTO
 														.getNameFileExport()
-														.trim(), "Export", "");
+																	.trim(),
+													"Export", "");
 									}
 								}
 									}
@@ -344,6 +362,26 @@ public class AccessControlDB_war implements EntryPoint {
 						}
 
 						image.setVisible(false);
+						
+						//JJaramillo - 2012-06-26 - Workaround para que muestre el texto en el TextArea
+						//             pues a veces solo se ve 'Plan hash value' (para el explain plan)
+						//             pues aunque el TextArea contiene todos los datos, no son visibles.
+						if (requestDTO.isExplainPlan()) {
+							image.setVisible(true);
+							sqlEng.echo("",
+									new AsyncCallback<String>() {
+								public void onFailure(Throwable caught) {
+									image.setVisible(false);
+									Window.alert("Ocurri\u00f3 un error al mostrar el explain plan. Por favor intente nuevamente.");
+								}
+
+								public void onSuccess(String s) {
+									image.setVisible(false);
+									txtrBuffer.setText(explainPlanDetails);
+									explainPlanDetails = "";
+								}
+							});
+						}
 					}
 				});
 	}
@@ -388,7 +426,8 @@ public class AccessControlDB_war implements EntryPoint {
 
 		grid.setWidget(3, 1, lisSource);
 
-		Label lblSourceNumber = new Label("Nro. de ticket, requerimiento o explicaci\u00F3n *");
+		Label lblSourceNumber = new Label(
+				"Nro. de ticket, requerimiento o explicaci\u00F3n *");
 		grid.setWidget(4, 0, lblSourceNumber);
 
 		txtSourceNumber.setText("");
@@ -406,8 +445,7 @@ public class AccessControlDB_war implements EntryPoint {
 		txtApplicacion.setText("");
 		grid.setWidget(6, 1, txtApplicacion);
 
-		Label lblObservations = new Label(
-				"Observaciones");
+		Label lblObservations = new Label("Observaciones");
 		grid.setWidget(7, 0, lblObservations);
 		
 		txtObservations.setText("");
@@ -480,12 +518,6 @@ public class AccessControlDB_war implements EntryPoint {
 
 								public void onSuccess(String[] data) {
 									if (data[0].length() > 0) {
-										//En la posición 4 de data viene el texto del error
-										//de conexión cuando un error ocurrió.
-										if (data.length >= 5 && data[4] != null && data[4].trim().length() > 0) {
-											Window.alert(data[4]);
-										} else {
-											//No hay un mensaje de error
 										dataConnection.setUrl(data[0]);
 										intRowsPerPage = Integer
 												.parseInt(data[1]);
@@ -496,7 +528,6 @@ public class AccessControlDB_war implements EntryPoint {
 										}
 											dataConnection.setTransaction(data[3]);
 										dialogo.hide();
-										}
 									} else {
 										Window.alert("Error de conexi\u00f3n");
 									}
@@ -946,6 +977,9 @@ public class AccessControlDB_war implements EntryPoint {
 
 		btnExecute.setStyleName("btnExecute");
 		btnClear.setStyleName("btnClear");
+		//Modificado el 2012-05-23 por Juan
+		btnExplainPlan.setStyleName("btnExplainPlan");
+		
 		btnChange.setStyleName("btnSwitchInstance");
 		btnCommit.setStyleName("btnCommitChanges");
 		btnOpenW.setStyleName("btnNewWin");
@@ -956,6 +990,10 @@ public class AccessControlDB_war implements EntryPoint {
 		RootPanel.get("user").add(txtUser1);
 		RootPanel.get("execute").add(btnExecute);
 		RootPanel.get("clear").add(btnClear);
+		
+		//Modificado el 2012-05-23 por Juan
+		RootPanel.get("explainPlan").add(btnExplainPlan);
+		
 		RootPanel.get("switchInstance").add(btnChange);
 		RootPanel.get("openWindow").add(btnOpenW);
 		RootPanel.get("preloader").add(image);
@@ -993,6 +1031,49 @@ public class AccessControlDB_war implements EntryPoint {
 		tableBlock.setRowData(listBlock);
 		tableBlock.getElement().setId("tableBlock");
 
+		//Modificado el 2012-05-24 por Juan
+		btnExplainPlan.addClickHandler(new ClickHandler(){
+			public void onClick(ClickEvent arg0) {
+				boolean val = true;
+				if (pendingChanges != null) {
+					if (!pendingChanges.isEmpty()) {
+						if (Window
+								.confirm("Realizo cambios en la tabla de resultados, \n"
+										+ "Si continua el sistema realizara un rollback automaticamente")) {
+							clearTable(table);
+							fillTable();
+							table.redraw();
+						} else {
+							val = false;
+						}
+					}
+				}
+
+				if (val) {
+					image.setVisible(true);
+					btnFirst.setEnabled(false);
+					btnPrevious.setEnabled(false);
+					btnNext.setFocus(true);
+					requestDTO.setStart(0);
+					intPage = 1;
+					btnNextFlag = true;
+					btnExcFlag = true;
+					clearTable(table);					
+					if (!pendingChangesVari.isEmpty()) {
+						commitVariable();
+					}
+					requestDTO.setCommitBlock(false);
+					requestDTO.setExportData(0);
+					//Modificado el 2012-05-24 por Juan
+					table.addStyleName("explainplan");
+					requestDTO.setExplainPlan(true);
+					
+					sendSql();
+					// intTotalRows = 0;
+				}
+			}			
+		});
+		
 		btnExecute.addClickHandler(new ClickHandler() {
 
 			public void onClick(ClickEvent event) {
@@ -1028,6 +1109,10 @@ public class AccessControlDB_war implements EntryPoint {
 					}
 					requestDTO.setCommitBlock(false);
 					requestDTO.setExportData(0);
+					//Modificado el 2012-05-23 por Juan
+					table.removeStyleName("explainplan");
+					requestDTO.setExplainPlan(false);
+					
 					sendSql();
 					// intTotalRows = 0;
 				}
@@ -1046,6 +1131,10 @@ public class AccessControlDB_war implements EntryPoint {
 				btnExcFlag = false;
 				requestDTO.setCommitBlock(false);
 				requestDTO.setExportData(0);
+				//Modificado el 2012-05-23 por Juan
+				table.removeStyleName("explainplan");
+				requestDTO.setExplainPlan(false);
+				
 				sendSql();
 			}
 		});
@@ -1058,6 +1147,10 @@ public class AccessControlDB_war implements EntryPoint {
 				controlButtons();
 				requestDTO.setCommitBlock(false);
 				requestDTO.setExportData(0);
+				//Modificado el 2012-05-23 por Juan
+				table.removeStyleName("explainplan");
+				requestDTO.setExplainPlan(false);
+				
 				sendSql();
 			}
 		});
@@ -1074,6 +1167,10 @@ public class AccessControlDB_war implements EntryPoint {
 				btnNext.setEnabled(true);
 				requestDTO.setCommitBlock(false);
 				requestDTO.setExportData(0);
+				//Modificado el 2012-05-23 por Juan
+				table.removeStyleName("explainplan");
+				requestDTO.setExplainPlan(false);
+				
 				sendSql();
 			}
 		});
@@ -1129,6 +1226,11 @@ public class AccessControlDB_war implements EntryPoint {
 		btnExport.addClickHandler(new ClickHandler() {
 
 			public void onClick(ClickEvent arg0) {
+				//Modificado por Juan 2012-05-29
+				//Validacion si hay un explain plain
+				if(requestDTO.isExplainPlan()){
+					return;
+				}
 				if (table.getRowCount() > 0) {
 					if (valiExport()) {
 						DialogBox modalExport = exportExcel();
@@ -1155,7 +1257,8 @@ public class AccessControlDB_war implements EntryPoint {
 			}
 		});
 		
-		RootPanel.get().addDomHandler(new PopupMenu(this), ContextMenuEvent.getType());
+		RootPanel.get().addDomHandler(new PopupMenu(this),
+				ContextMenuEvent.getType());
 	}
 
 	/**
@@ -1169,6 +1272,10 @@ public class AccessControlDB_war implements EntryPoint {
 		intPage = 1;
 		requestDTO.setCommitBlock(false);
 		requestDTO.setExportData(0);
+		//Modificado el 2012-05-23 por Juan
+		table.removeStyleName("explainplan");
+		requestDTO.setExplainPlan(false);
+		
 		sendSql();
 	}
 
@@ -1965,6 +2072,10 @@ public class AccessControlDB_war implements EntryPoint {
 				if (requestDTO.getBlockSQL().length > 0) {
 				requestDTO.setCommitBlock(true);
 				requestDTO.setExportData(0);
+				//Modificado el 2012-05-23 por Juan
+				table.removeStyleName("explainplan");
+				requestDTO.setExplainPlan(false);
+				
 				sendSql();
 				} else {
 					Window.alert("No hay instrucciones a ejecutar");
@@ -2013,6 +2124,10 @@ public class AccessControlDB_war implements EntryPoint {
 		btnOk.addClickHandler(new ClickHandler() {
 
 			public void onClick(ClickEvent arg0) {
+				//Modificado el 2012-05-23 por Juan
+				table.removeStyleName("explainplan");
+				requestDTO.setExplainPlan(false);
+				
 				if (rdb1.getValue()) {
 					requestDTO.setExportData(1);
 				}
