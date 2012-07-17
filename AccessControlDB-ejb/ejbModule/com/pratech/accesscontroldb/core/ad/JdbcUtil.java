@@ -45,7 +45,12 @@ public class JdbcUtil {
 			logSql.setTransaccion(dataInstance.get("transaction"));
 			logSql.setUsuario(dataInstance.get("analyst"));
 			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
-					dataInstance.get("user"), dataInstance.get("scope") });
+					dataInstance.get("user"), dataInstance.get("scope"),
+					null, null, null,
+					dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+							dataInstance.get("team").substring(0, 255)
+							: dataInstance.get("team")
+					});
 			logSql.setDescripcionAudit("Problem occurred while trying to enable dbms_output! "
 					+ e.toString());
 			logSql.setProceso("Class " + JdbcUtil.class.getName()
@@ -92,7 +97,12 @@ public class JdbcUtil {
 			logSql.setTransaccion(dataInstance.get("transaction"));
 			logSql.setUsuario(dataInstance.get("analyst"));
 			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
-					dataInstance.get("user"), dataInstance.get("scope") });
+					dataInstance.get("user"), dataInstance.get("scope"),
+					null, null, null,
+					dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+							dataInstance.get("team").substring(0, 255)
+							: dataInstance.get("team")
+					});
 			logSql.setDescripcionAudit(result);
 			logSql.setProceso("Class " + JdbcUtil.class.getName()
 					+ ", Procedure print_dbms_output");

@@ -117,7 +117,12 @@ public class ExecuteSql {
 							dataInstance.get("url"), dataInstance.get("user"),
 							"SQL statement executed",
 							dataInstance.get("instance"),
-							dataInstance.get("scope") });
+							dataInstance.get("scope"),
+							null, null, null,
+							dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+									dataInstance.get("team").substring(0, 255)
+									: dataInstance.get("team")
+							});
 					logSql.setCod("AC3");
 					Store.getInstance().save("3", logSql);
 				}
@@ -138,7 +143,12 @@ public class ExecuteSql {
 					logSql.setCamposTexto(new String[] {
 							dataInstance.get("url"), dataInstance.get("user"),
 							resu, dataInstance.get("instance"),
-							dataInstance.get("scope") });
+							dataInstance.get("scope"),
+							null, null, null,
+							dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+									dataInstance.get("team").substring(0, 255)
+									: dataInstance.get("team")
+							});
 					logSql.setDescripcionAudit(requestDTO.getStringSQL());
 					logSql.setProceso("Class ExecuteSql, Procedure Execute");
 					logSql.setCod("AC2");
@@ -160,7 +170,12 @@ public class ExecuteSql {
 			logSql.setProceso("Class ExecuteSql, Procedure Execute");
 			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 					dataInstance.get("user"), responseDto.getSqlBuffer(),
-					dataInstance.get("instance"), dataInstance.get("scope") });
+					dataInstance.get("instance"), dataInstance.get("scope"),
+					null, null, null,
+					dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+							dataInstance.get("team").substring(0, 255)
+							: dataInstance.get("team")
+					});
 			logSql.setCod("AC3");
 			Store.getInstance().save("3", logSql);
 			
@@ -177,7 +192,12 @@ public class ExecuteSql {
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
-						dataInstance.get("instance"), dataInstance.get("scope") });
+						dataInstance.get("instance"), dataInstance.get("scope"),
+						null, null, null,
+						dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+								dataInstance.get("team").substring(0, 255)
+								: dataInstance.get("team")
+						});
 				logSql.setDescripcionAudit(requestDTO.getStringSQL());
 				logSql.setProceso("Class ExecuteSql, Procedure Execute");
 				logSql.setCod("AC3");
@@ -194,7 +214,12 @@ public class ExecuteSql {
 			logSql.setUsuario(dataInstance.get("analyst"));
 			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 					dataInstance.get("user"), responseDto.getSqlBuffer(),
-					dataInstance.get("instance"), dataInstance.get("scope") });
+					dataInstance.get("instance"), dataInstance.get("scope"),
+					null, null, null,
+					dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+							dataInstance.get("team").substring(0, 255)
+							: dataInstance.get("team")
+					});
 			logSql.setDescripcionAudit(requestDTO.getStringSQL());
 			logSql.setProceso("Class ExecuteSql, Procedure Execute");
 			logSql.setCod("AC3");
@@ -213,7 +238,12 @@ public class ExecuteSql {
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
-						dataInstance.get("instance"), dataInstance.get("scope") });
+						dataInstance.get("instance"), dataInstance.get("scope"),
+						null, null, null,
+						dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+								dataInstance.get("team").substring(0, 255)
+								: dataInstance.get("team")
+						});
 				logSql.setDescripcionAudit(requestDTO.getStringSQL());
 				logSql.setProceso("Class ExecuteSql, Procedure Execute");
 				logSql.setCod("AC3");
@@ -250,7 +280,12 @@ public class ExecuteSql {
 				logSql.setProceso("Class ExecuteSql, Procedure Execute");
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
-						dataInstance.get("instance"), dataInstance.get("scope") });
+						dataInstance.get("instance"), dataInstance.get("scope"),
+						null, null, null,
+						dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+								dataInstance.get("team").substring(0, 255)
+								: dataInstance.get("team")
+						});
 				logSql.setCod("AC3");
 				Store.getInstance().save("3", logSql);
 				
@@ -269,7 +304,12 @@ public class ExecuteSql {
 				logSql.setProceso("Class ExecuteSql, Procedure Execute");
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
-						dataInstance.get("instance"), dataInstance.get("scope") });
+						dataInstance.get("instance"), dataInstance.get("scope"),
+						null, null, null,
+						dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+								dataInstance.get("team").substring(0, 255)
+								: dataInstance.get("team")
+						});
 				logSql.setCod("AC3");
 				Store.getInstance().save("3", logSql);
 				
@@ -286,7 +326,12 @@ public class ExecuteSql {
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
-						dataInstance.get("instance"), dataInstance.get("scope") });
+						dataInstance.get("instance"), dataInstance.get("scope"),
+						null, null, null,
+						dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+								dataInstance.get("team").substring(0, 255)
+								: dataInstance.get("team")
+						});
 				logSql.setDescripcionAudit(requestDTO.getStringSQL());
 				logSql.setProceso("Class ExecuteSql, Procedure Execute");
 				logSql.setCod("AC3");
@@ -307,7 +352,12 @@ public class ExecuteSql {
 					logSql.setUsuario(dataInstance.get("analyst"));
 					logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 							dataInstance.get("user"), responseDto.getSqlBuffer(),
-							dataInstance.get("instance"), dataInstance.get("scope") });
+							dataInstance.get("instance"), dataInstance.get("scope"),
+							null, null, null,
+							dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+									dataInstance.get("team").substring(0, 255)
+									: dataInstance.get("team")
+							});
 					logSql.setDescripcionAudit(requestDTO.getStringSQL());
 					logSql.setProceso("Class ExecuteSql, Procedure Execute");
 					logSql.setCod("AC3");
@@ -486,7 +536,12 @@ public class ExecuteSql {
 				logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), "SQL statement executed",
-						dataInstance.get("instance"), dataInstance.get("scope") });
+						dataInstance.get("instance"), dataInstance.get("scope"),
+						null, null, null,
+						dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+								dataInstance.get("team").substring(0, 255)
+								: dataInstance.get("team")
+						});
 				logSql.setCod("AC2");
 				Store.getInstance().save("2", logSql);
 			}
@@ -501,7 +556,12 @@ public class ExecuteSql {
 			logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
 			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 					dataInstance.get("user"), responseDto.getSqlBuffer(),
-					dataInstance.get("instance"), dataInstance.get("scope") });
+					dataInstance.get("instance"), dataInstance.get("scope"),
+					null, null, null,
+					dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+							dataInstance.get("team").substring(0, 255)
+							: dataInstance.get("team")
+					});
 			logSql.setCod("AC3");
 			Store.getInstance().save("3", logSql);
 			
@@ -518,7 +578,12 @@ public class ExecuteSql {
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
-						dataInstance.get("instance"), dataInstance.get("scope") });
+						dataInstance.get("instance"), dataInstance.get("scope"),
+						null, null, null,
+						dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+								dataInstance.get("team").substring(0, 255)
+								: dataInstance.get("team")
+						});
 				logSql.setDescripcionAudit(SQLCronos + ";" + SQLSelect);
 				logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
 				logSql.setCod("AC3");
@@ -535,7 +600,12 @@ public class ExecuteSql {
 			logSql.setUsuario(dataInstance.get("analyst"));
 			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 					dataInstance.get("user"), responseDto.getSqlBuffer(),
-					dataInstance.get("instance"), dataInstance.get("scope") });
+					dataInstance.get("instance"), dataInstance.get("scope"),
+					null, null, null,
+					dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+							dataInstance.get("team").substring(0, 255)
+							: dataInstance.get("team")
+					});
 			logSql.setDescripcionAudit(SQLCronos + ";" + SQLSelect);
 			logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
 			logSql.setCod("AC3");
@@ -552,7 +622,12 @@ public class ExecuteSql {
 			logSql.setUsuario(dataInstance.get("analyst"));
 			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 					dataInstance.get("user"), responseDto.getSqlBuffer(),
-					dataInstance.get("instance"), dataInstance.get("scope") });
+					dataInstance.get("instance"), dataInstance.get("scope"),
+					null, null, null,
+					dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+							dataInstance.get("team").substring(0, 255)
+							: dataInstance.get("team")
+					});
 			logSql.setDescripcionAudit(SQLCronos + ";" + SQLSelect);
 			logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
 			logSql.setCod("AC3");
@@ -572,7 +647,12 @@ public class ExecuteSql {
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
-						dataInstance.get("instance"), dataInstance.get("scope") });
+						dataInstance.get("instance"), dataInstance.get("scope"),
+						null, null, null,
+						dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+								dataInstance.get("team").substring(0, 255)
+								: dataInstance.get("team")
+						});
 				logSql.setDescripcionAudit(SQLCronos + ";" + SQLSelect);
 				logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
 				logSql.setCod("AC3");
@@ -592,7 +672,12 @@ public class ExecuteSql {
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
-						dataInstance.get("instance"), dataInstance.get("scope") });
+						dataInstance.get("instance"), dataInstance.get("scope"),
+						null, null, null,
+						dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+								dataInstance.get("team").substring(0, 255)
+								: dataInstance.get("team")
+						});
 				logSql.setDescripcionAudit(SQLCronos + ";" + SQLSelect);
 				logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
 				logSql.setCod("AC3");
@@ -657,7 +742,12 @@ public class ExecuteSql {
 			logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
 			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 					dataInstance.get("user"), "", dataInstance.get("instance"),
-					dataInstance.get("scope") });
+					dataInstance.get("scope"),
+					null, null, null,
+					dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+							dataInstance.get("team").substring(0, 255)
+							: dataInstance.get("team")
+					});
 			logSql.setCod("AC3");
 			Store.getInstance().save("3", logSql);
 			
@@ -779,7 +869,12 @@ public class ExecuteSql {
 			logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
 			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 					dataInstance.get("user"), "", dataInstance.get("instance"),
-					dataInstance.get("scope") });
+					dataInstance.get("scope"),
+					null, null, null,
+					dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+							dataInstance.get("team").substring(0, 255)
+							: dataInstance.get("team")
+					});
 			logSql.setCod("AC3");
 			Store.getInstance().save("3", logSql);
 			
@@ -896,7 +991,12 @@ public class ExecuteSql {
 			logSql.setProceso("Class ExecuteSql, Procedure executeSP");
 			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 					dataInstance.get("user"), "SQL statement executed",
-					dataInstance.get("instance"), dataInstance.get("scope") });
+					dataInstance.get("instance"), dataInstance.get("scope"),
+					null, null, null,
+					dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+							dataInstance.get("team").substring(0, 255)
+							: dataInstance.get("team")
+					});
 			logSql.setCod("AC3");
 			Store.getInstance().save("3", logSql);
 
@@ -909,7 +1009,12 @@ public class ExecuteSql {
 			logSql.setProceso("Class ExecuteSql, Procedure UpdateRecords");
 			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 					dataInstance.get("user"), responseDto.getSqlBuffer(),
-					dataInstance.get("instance"), dataInstance.get("scope") });
+					dataInstance.get("instance"), dataInstance.get("scope"),
+					null, null, null,
+					dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+							dataInstance.get("team").substring(0, 255)
+							: dataInstance.get("team")
+					});
 			logSql.setCod("AC3");
 			Store.getInstance().save("3", logSql);
 			
@@ -926,7 +1031,12 @@ public class ExecuteSql {
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
-						dataInstance.get("instance"), dataInstance.get("scope") });
+						dataInstance.get("instance"), dataInstance.get("scope"),
+						null, null, null,
+						dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+								dataInstance.get("team").substring(0, 255)
+								: dataInstance.get("team")
+						});
 				logSql.setDescripcionAudit(requestDTO.getStringSQL() + variBloc);
 				logSql.setProceso("Class ExecuteSql, Procedure Execute");
 				logSql.setCod("AC3");
@@ -948,7 +1058,12 @@ public class ExecuteSql {
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
-						dataInstance.get("instance"), dataInstance.get("scope") });
+						dataInstance.get("instance"), dataInstance.get("scope"),
+						null, null, null,
+						dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+								dataInstance.get("team").substring(0, 255)
+								: dataInstance.get("team")
+						});
 				logSql.setDescripcionAudit(requestDTO.getStringSQL() + variBloc);
 				logSql.setProceso("Class ExecuteSql, Procedure Execute");
 				logSql.setCod("AC3");
@@ -968,7 +1083,12 @@ public class ExecuteSql {
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
-						dataInstance.get("instance"), dataInstance.get("scope") });
+						dataInstance.get("instance"), dataInstance.get("scope"),
+						null, null, null,
+						dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+								dataInstance.get("team").substring(0, 255)
+								: dataInstance.get("team")
+						});
 				logSql.setDescripcionAudit(requestDTO.getStringSQL() + variBloc);
 				logSql.setProceso("Class ExecuteSql, Procedure Execute");
 				logSql.setCod("AC3");
@@ -1043,7 +1163,12 @@ public class ExecuteSql {
 							dataInstance.get("url"), dataInstance.get("user"),
 							responseDto.getSqlBuffer(),
 							dataInstance.get("instance"),
-							dataInstance.get("scope") });
+							dataInstance.get("scope"),
+							null, null, null,
+							dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+									dataInstance.get("team").substring(0, 255)
+									: dataInstance.get("team")
+							});
 				logSql.setDescripcionAudit(resu);
 				logSql.setProceso("Class ExecuteSql, Procedure Execute");
 				logSql.setCod("AC2");
@@ -1066,7 +1191,12 @@ public class ExecuteSql {
 			logSql.setProceso("Class ExecuteSql, Procedure executeBlock");
 			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 					dataInstance.get("user"), responseDto.getSqlBuffer(),
-					dataInstance.get("instance"),dataInstance.get("scope") });
+					dataInstance.get("instance"),dataInstance.get("scope"),
+					null, null, null,
+					dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+							dataInstance.get("team").substring(0, 255)
+							: dataInstance.get("team")
+					});
 			logSql.setCod("AC3");
 			Store.getInstance().save("3", logSql);
 			
@@ -1083,7 +1213,12 @@ public class ExecuteSql {
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
-						dataInstance.get("instance"), dataInstance.get("scope") });
+						dataInstance.get("instance"), dataInstance.get("scope"),
+						null, null, null,
+						dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+								dataInstance.get("team").substring(0, 255)
+								: dataInstance.get("team")
+						});
 				logSql.setDescripcionAudit(requestDTO.getStringSQL());
 				logSql.setProceso("Class ExecuteSql, Procedure executeBlock");
 				logSql.setCod("AC3");
@@ -1100,7 +1235,12 @@ public class ExecuteSql {
 			logSql.setUsuario(dataInstance.get("analyst"));
 			logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 					dataInstance.get("user"), responseDto.getSqlBuffer(),
-					dataInstance.get("instance"), dataInstance.get("scope") });
+					dataInstance.get("instance"), dataInstance.get("scope"),
+					null, null, null,
+					dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+							dataInstance.get("team").substring(0, 255)
+							: dataInstance.get("team")
+					});
 			logSql.setDescripcionAudit(requestDTO.getStringSQL());
 			logSql.setProceso("Class ExecuteSql, Procedure executeBlock");
 			logSql.setCod("AC3");
@@ -1119,7 +1259,12 @@ public class ExecuteSql {
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
-						dataInstance.get("instance"), dataInstance.get("scope") });
+						dataInstance.get("instance"), dataInstance.get("scope"),
+						null, null, null,
+						dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+								dataInstance.get("team").substring(0, 255)
+								: dataInstance.get("team")
+						});
 				logSql.setDescripcionAudit(requestDTO.getStringSQL());
 				logSql.setProceso("Class ExecuteSql, Procedure executeBlock");
 				logSql.setCod("AC3");
@@ -1139,7 +1284,12 @@ public class ExecuteSql {
 				logSql.setUsuario(dataInstance.get("analyst"));
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
-						dataInstance.get("instance"),dataInstance.get("scope") });
+						dataInstance.get("instance"),dataInstance.get("scope"),
+						null, null, null,
+						dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+								dataInstance.get("team").substring(0, 255)
+								: dataInstance.get("team")
+						});
 				logSql.setDescripcionAudit(requestDTO.getStringSQL());
 				logSql.setProceso("Class ExecuteSql, Procedure executeBlock");
 				logSql.setCod("AC3");
@@ -1283,7 +1433,12 @@ public class ExecuteSql {
 				logSql.setProceso("Class ExecuteSql, Procedure executeExplainPlan");
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), "Explain plan executed",
-						dataInstance.get("instance"), dataInstance.get("scope") });
+						dataInstance.get("instance"), dataInstance.get("scope"),
+						null, null, null,
+						dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+								dataInstance.get("team").substring(0, 255)
+								: dataInstance.get("team")
+						});
 				logSql.setCod("AC5");
 				Store.getInstance().save("5", logSql);
 			} catch (SQLException e) {
@@ -1295,7 +1450,12 @@ public class ExecuteSql {
 				logSql.setProceso("Class ExecuteSql, Procedure executeExplainPlan");
 				logSql.setCamposTexto(new String[] { dataInstance.get("url"),
 						dataInstance.get("user"), responseDto.getSqlBuffer(),
-						dataInstance.get("instance"), dataInstance.get("scope") });
+						dataInstance.get("instance"), dataInstance.get("scope"),
+						null, null, null,
+						dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+								dataInstance.get("team").substring(0, 255)
+								: dataInstance.get("team")
+						});
 				logSql.setCod("AC5");
 				Store.getInstance().save("5", logSql);
 
@@ -1320,7 +1480,12 @@ public class ExecuteSql {
 								dataInstance.get("user"),
 								responseDto.getSqlBuffer(),
 								dataInstance.get("instance"),
-								dataInstance.get("scope") });
+								dataInstance.get("scope"),
+								null, null, null,
+								dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+										dataInstance.get("team").substring(0, 255)
+										: dataInstance.get("team")
+								});
 						logSql.setCod("AC5");
 						Store.getInstance().save("5", logSql);
 
@@ -1346,7 +1511,12 @@ public class ExecuteSql {
 								dataInstance.get("user"),
 								responseDto.getSqlBuffer(),
 								dataInstance.get("instance"),
-								dataInstance.get("scope") });
+								dataInstance.get("scope"),
+								null, null, null,
+								dataInstance.get("team") != null && dataInstance.get("team").length() > 255?
+										dataInstance.get("team").substring(0, 255)
+										: dataInstance.get("team")
+								});
 						logSql.setCod("AC5");
 						Store.getInstance().save("5", logSql);
 
