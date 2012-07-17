@@ -354,7 +354,7 @@ public class AccessControlDB_war implements EntryPoint {
 												+ responseDTO
 														.getNameFileExport()
 																	.trim(),
-													"Export", "");
+													"_self", "");
 									}
 								}
 									}
