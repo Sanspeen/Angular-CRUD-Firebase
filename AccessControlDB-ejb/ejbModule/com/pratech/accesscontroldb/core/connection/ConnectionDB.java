@@ -57,6 +57,13 @@ public class ConnectionDB {
 			} else {
 				Class.forName(ACConfig.getValue("JDBC.DRIVER.SQLSERVER"));
 			}
+			int dbConnectionTimeout = 5;
+			try {
+				dbConnectionTimeout = Integer.valueOf(ACConfig.getValue("dbConnectionTimeout"));
+			} catch (Exception e) {
+				//No se hace nada. Si esta mal configurada la variable, se dejan 5 segundos por defecto
+			}
+			DriverManager.setLoginTimeout(dbConnectionTimeout);
 			con = DriverManager.getConnection(JDBC, user, pass);
 
 		} catch (ClassNotFoundException e) {
