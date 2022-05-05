@@ -13,34 +13,14 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>Santiago</td>
-                    <td>Franco</td>
-                    <td>Mejia</td>
-                    <td>150</td>
+                  <tr *ngFor="let empleado of empleados">
+                    <td>{{ empleado.nombre }}</td>
+                    <td>{{ empleado.apellido }}</td>
+                    <td>{{ empleado.documento }}</td>
+                    <td>{{ empleado.salario | currency }}</td>
                     <td>
                         <button class="btn btn-dark text-info mr-2">Edit</button>
-                        <button class="btn btn-dark text-danger mr-2">Delete</button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Santiago</td>
-                    <td>Franco</td>
-                    <td>Mejia</td>
-                    <td>150</td>
-                    <td>
-                        <button class="btn btn-dark text-info mr-2">Edit</button>
-                        <button class="btn btn-dark text-danger mr-2">Delete</button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Santiago</td>
-                    <td>Franco</td>
-                    <td>Mejia</td>
-                    <td>150</td>
-                    <td>
-                        <button class="btn btn-dark text-info mr-2">Edit</button>
-                        <button class="btn btn-dark text-danger mr-2">Delete</button>
+                        <button class="btn btn-dark text-danger mr-2" (click)="eliminar(empleado.id)">Delete</button>
                     </td>
                   </tr>
                 </tbody>
