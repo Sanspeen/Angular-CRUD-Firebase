@@ -12,6 +12,8 @@ import { CreateEmpleadoComponent } from './components/create-empleado/create-emp
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { environment } from 'src/environments/environment';
 import { ReactiveFormsModule } from '@angular/forms';
+import { ToastrModule } from 'ngx-toastr';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
@@ -25,7 +27,9 @@ import { ReactiveFormsModule } from '@angular/forms';
     AppRoutingModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    ToastrModule.forRoot(),
+    BrowserAnimationsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
