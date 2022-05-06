@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { EmpleadoService } from 'src/app/services/empleado.service';
 
@@ -13,12 +13,15 @@ export class CreateEmpleadoComponent implements OnInit {
   createEmpleado: FormGroup;
   submitted = false;
   loading = false;
+  id: string | null;
+  titulo = 'Agregar empleado';
 
   constructor(
     private formBuilder: FormBuilder,
     private empleadoService: EmpleadoService,
     private router: Router,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private aRoute: ActivatedRoute
   ) {
     this.createEmpleado = this.formBuilder.group({
       nombre: ['', Validators.required],
@@ -26,15 +29,44 @@ export class CreateEmpleadoComponent implements OnInit {
       documento: ['', Validators.required],
       salario: ['', Validators.required],
     });
+    this.id = this.aRoute.snapshot.paramMap.get('id');
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.esEditar();
+  }
 
-  agregarEmpleado() {
+  agregarEditarEmpleado() {
     if (this.createEmpleado.invalid) {
       return;
     }
+    if (this.id === null) {
+      this.agregarEmpleado();
+    }else{
+      this.editarEmpleado(this.id);
+    }
+  }
 
+  editarEmpleado(id:string){
+    this.loading = true;
+    const empleado: any = {
+      nombre: this.createEmpleado.value.nombre,
+      apellido: this.createEmpleado.value.apellido,
+      documento: this.createEmpleado.value.documento,
+      salario: this.createEmpleado.value.salario,
+      fechaActualizacion: new Date(),
+    };
+
+    this.empleadoService.actualizarEmpleado(id, empleado).then(() => {
+      this.loading = false;
+      this.toastr.info("El empleado fue modificado con exito", "Empleado modificado", {
+        positionClass:'toast-bottom-right'
+      });
+      this.router.navigate(['/list-empleados']);
+    });
+  }
+
+  agregarEmpleado() {
     const empleado: any = {
       nombre: this.createEmpleado.value.nombre,
       apellido: this.createEmpleado.value.apellido,
@@ -45,13 +77,17 @@ export class CreateEmpleadoComponent implements OnInit {
     };
     this.submitted = true;
     this.loading = true;
-    
+
     this.empleadoService
       .agregarEmpleado(empleado)
       .then(() => {
-        this.toastr.success('¡El empleado ha sido registrado con exito!', 'Empleado registrado.', {
-          positionClass:'toast-bottom-right'
-        })
+        this.toastr.success(
+          '¡El empleado ha sido registrado con exito!',
+          'Empleado registrado.',
+          {
+            positionClass: 'toast-bottom-right',
+          }
+        );
         this.loading = false;
         this.router.navigate(['/list-empleados']);
       })
@@ -59,5 +95,21 @@ export class CreateEmpleadoComponent implements OnInit {
         console.log(error);
         this.loading = false;
       });
+  }
+
+  esEditar() {
+    if (this.id !== null) {
+      this.titulo = 'Editar empleado';
+      this.loading = true;
+      this.empleadoService.getEmpleado(this.id).subscribe((data) => {
+        this.loading = false;
+        this.createEmpleado.setValue({
+          nombre: data.payload.data()['nombre'],
+          apellido: data.payload.data()['apellido'],
+          documento: data.payload.data()['documento'],
+          salario: data.payload.data()['salario'],
+        });
+      });
     }
+  }
 }

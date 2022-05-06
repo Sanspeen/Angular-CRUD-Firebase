@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { EmpleadoService } from 'src/app/services/empleado.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-list-empleados',
@@ -10,7 +11,7 @@ export class ListEmpleadosComponent implements OnInit {
   
   empleados:any[] = [];
   
-  constructor(private _empleadoService:EmpleadoService) {
+    constructor(private _empleadoService:EmpleadoService, private toastr: ToastrService) {
    }
 
   ngOnInit(): void {
@@ -33,6 +34,9 @@ export class ListEmpleadosComponent implements OnInit {
   eliminar(id:string){
     this._empleadoService.eliminarEmpleado(id).then(() => {
       console.log('Eliminado correctamente');
+      this.toastr.error('El usuario ha sido eliminado con exito!', 'Usuario eliminado', {
+        positionClass:'toast-bottom-left'
+      })
     }).catch(error => {
       console.log(error);
     });

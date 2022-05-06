@@ -3,7 +3,8 @@
         <div class="card-body">
             <span class="h3">Lista de Empleados</span>
             <button class="btn btn-dark btn-lg float-right" routerLink="/create-empleados">Agregar</button>
-            <table class="table table-striped mt-5">
+            <h5 *ngIf="empleados.length==0" class="mt-5">Esperando registros</h5>
+            <table *ngIf="empleados.length > 0" class="table table-striped mt-5">
                 <thead>
                   <tr>
                     <th>Nombre</th>
@@ -19,7 +20,7 @@
                     <td>{{ empleado.documento }}</td>
                     <td>{{ empleado.salario | currency }}</td>
                     <td>
-                        <button class="btn btn-dark text-info mr-2">Edit</button>
+                        <button class="btn btn-dark text-info mr-2" [routerLink]="['/edit-empleados/', empleado.id]">Edit</button>
                         <button class="btn btn-dark text-danger mr-2" (click)="eliminar(empleado.id)">Delete</button>
                     </td>
                   </tr>
