@@ -23,9 +23,7 @@ export class PostEditComponent implements OnInit {
 
     this.route.params.subscribe((params: Params)=>{
       if(params["index"]){
-        
         this.index = params["index"]
-        
         const post = this.postService.getPost(this.index)
         title = post.title;
         description = post.description
@@ -51,7 +49,8 @@ export class PostEditComponent implements OnInit {
       description,
       imagePath,
       'test@gmail.com',
-      new Date()
+      new Date(),
+      0
     );
 
     if(this.editMode){

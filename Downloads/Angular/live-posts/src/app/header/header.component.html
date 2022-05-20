@@ -16,6 +16,8 @@
             <li><a routerLink="/post-add">Add Post</a></li>
           </ul>
         <ul class="nav navbar-nav navbar-right">
+          <li><a (click)="onSave()" style="cursor: pointer"><span class="glyphicon glyphicon-floppy-saved"></span> Save </a></li>
+          <li><a style="cursor:pointer" (click)="onFetch()" ><span class="glyphicon glyphicon-circle-arrow-down"></span> Fetch </a></li>
           <li><a routerLink="/auth"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
           <li><a routerLink="/auth"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
         </ul>
